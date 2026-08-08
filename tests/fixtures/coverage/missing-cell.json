@@ -1,0 +1,327 @@
+{
+  "schema_version": "v1",
+  "slug": "coverage-matrix-missing-cell",
+  "goal": "fixture goal",
+  "context_refs": [],
+  "priorities": [
+    {
+      "id": "P1",
+      "title": "t1",
+      "why": "w",
+      "pr_split": {
+        "suggested_prs": 1,
+        "functional_pr": true
+      }
+    }
+  ],
+  "scs": [
+    {
+      "id": "SC-1",
+      "priority_id": "P1",
+      "kind": "fix",
+      "granularity": "anchor",
+      "change": "c1",
+      "holds": "h1",
+      "verify": {
+        "cmd": "echo",
+        "args": [
+          "ok"
+        ]
+      },
+      "expect": "ok",
+      "anchor_paths": [
+        "src/app/App.tsx",
+        "src/lib/util.ts"
+      ],
+      "faces": [
+        "A",
+        "B",
+        "C"
+      ],
+      "gates": [
+        "format-gate",
+        "rule-compliance"
+      ],
+      "hardening_classes": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "predicted_invariant": "iv1",
+      "predicted_primary_face": "A"
+    },
+    {
+      "id": "SC-2",
+      "priority_id": "P1",
+      "kind": "verify",
+      "granularity": "assertion",
+      "change": "c2",
+      "holds": "h2",
+      "verify": {
+        "cmd": "echo",
+        "args": [
+          "ok"
+        ]
+      },
+      "expect": "ok",
+      "anchor_paths": [
+        "src/canvas/Canvas.tsx"
+      ],
+      "faces": [
+        "A",
+        "C"
+      ],
+      "gates": [
+        "security-privacy-gate",
+        "product-arch-gate"
+      ],
+      "hardening_classes": [
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "id": "SC-3",
+      "priority_id": "P1",
+      "kind": "probe",
+      "granularity": "assertion",
+      "change": "c3",
+      "holds": "h3",
+      "verify": {
+        "cmd": "echo",
+        "args": [
+          "ok"
+        ]
+      },
+      "expect": "ok",
+      "anchor_paths": [
+        "src/server/index.ts"
+      ],
+      "faces": [
+        "A"
+      ],
+      "gates": [],
+      "hardening_classes": [
+        1
+      ]
+    }
+  ],
+  "coverage": [
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "A",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "B",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e",
+      "ui_prediction": {
+        "input_paths": [
+          "src/app/App.tsx",
+          "src/canvas/Canvas.tsx",
+          "src/lib/util.ts",
+          "src/server/index.ts"
+        ],
+        "registry_path": "/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot/scripts/ui-paths/registry.mivo.json",
+        "config_hash": "30ded181541746dc17b3d091000b7e50901ca34f1ad341f4ee668e3ce9be43f1",
+        "touches_ui": true,
+        "matched_paths": [
+          "src/app/App.tsx",
+          "src/canvas/Canvas.tsx"
+        ]
+      }
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "C",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "E",
+      "status": "n_a",
+      "sc_ids": [],
+      "evidence": "fixture: 本 task 对该面不作声称,且无 SC 声明 face E",
+      "reason_code": "no_claim_made"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "F",
+      "status": "n_a",
+      "sc_ids": [],
+      "evidence": "fixture: 本 task 无越界风险,且无 SC 声明 face F",
+      "reason_code": "no_scope_risk"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "G",
+      "status": "n_a",
+      "sc_ids": [],
+      "evidence": "fixture: 本 task 对该面不作声称,且无 SC 声明 face G",
+      "reason_code": "no_claim_made"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "gate",
+      "dimension_id": "format-gate",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "gate",
+      "dimension_id": "rule-compliance",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "gate",
+      "dimension_id": "security-privacy-gate",
+      "status": "covered",
+      "sc_ids": [
+        "SC-2"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "gate",
+      "dimension_id": "product-arch-gate",
+      "status": "covered",
+      "sc_ids": [
+        "SC-2"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "1",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "2",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "3",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "4",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "5",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "6",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "7",
+      "status": "covered",
+      "sc_ids": [
+        "SC-2"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "8",
+      "status": "covered",
+      "sc_ids": [
+        "SC-2"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "9",
+      "status": "covered",
+      "sc_ids": [
+        "SC-2"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "10",
+      "status": "covered",
+      "sc_ids": [
+        "SC-2"
+      ],
+      "evidence": "e"
+    }
+  ]
+}

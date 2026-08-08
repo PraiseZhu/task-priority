@@ -1,0 +1,6 @@
+node_modules/
+!tests/fixtures/preflight/repo-template/node_modules/
+!tests/fixtures/preflight/repo-template/node_modules/.bin/
+!tests/fixtures/preflight/repo-template/node_modules/.bin/*
+*.log
+tests/.tmp/

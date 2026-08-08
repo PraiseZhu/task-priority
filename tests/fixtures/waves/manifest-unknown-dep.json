@@ -1,0 +1,23 @@
+{
+  "schema_version": "v1",
+  "slug": "waves-fixture-unknown-dep",
+  "goal": "waves-plan CLI 未知依赖 id 测试用 fixture（SC-5 支 5）",
+  "context_refs": [],
+  "priorities": [
+    { "id": "p1", "title": "fixture", "why": "测试", "pr_split": { "suggested_prs": 1, "functional_pr": true } }
+  ],
+  "scs": [
+    {
+      "id": "f1",
+      "priority_id": "p1",
+      "kind": "fix",
+      "granularity": "assertion",
+      "change": "改 a",
+      "holds": "a 行为正确",
+      "verify": { "cmd": "node", "args": [] },
+      "expect": "ok",
+      "anchor_paths": ["src/a.ts"],
+      "depends_on": ["nonexistent-sc"]
+    }
+  ]
+}

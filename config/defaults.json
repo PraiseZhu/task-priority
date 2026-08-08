@@ -1,0 +1,18 @@
+{
+  "_comment": "task-priority skill 配置。capacity 刻意不在此——由 lib/authority.mjs 从 pr-autopilot/config/orchestration.json 现读(单一真相源,计划 F5)。registry 也不在此硬编码映射——由 lib/authority.mjs 扫描 registry.*.json 的 repo 字段派生(计划 F35)。",
+  "schema_version": "v1",
+  "prAutopilotRoot": "/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot",
+  "uiRegistryDir": "scripts/ui-paths",
+  "preflightTimeoutMs": 120000,
+  "worktreeTmpRoot": "/tmp/task-priority-preflight",
+  "preflightTestInclude": {
+    "vitest": "\\.(test|spec)\\.(?:[cm]?[jt]sx?)$"
+  },
+  "preflightVitestCosmeticFlags": ["--reporter"],
+  "preflightShapeAllowlist": [
+    { "cmd": "vitest", "argvShape": "run [--reporter <name>|--reporter=<name>] [-t <pattern>] <target>", "note": "结构化解析（见 sc-preflight.mjs parseVitestArgs）：--reporter 纯展示 flag 放行仍实跑；目标路径必须真实存在且命中 preflightTestInclude；形状不匹配一律 fabricated 不降级 exists_not_run（防绕过）；拒 --config/-c/绝对路径/.." },
+    { "cmd": "tsc", "argvShape": "^--noEmit$", "note": "仅类型检查,无其它参数；形状不匹配一律 fabricated 不降级 exists_not_run（防绕过）" }
+  ],
+  "preflightExistsOnlyRunners": ["node", "eslint", "npm", "npx", "playwright", "bash"],
+  "preflightRejectArgPatterns": ["^--config$", "^-c$", "^-e$", "^--eval$", "^/", "\\.\\."]
+}

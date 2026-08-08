@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "slug": "demo-draft",
+  "goal": "演示 draft 阶段合法 manifest（SC-6 第 16 支）",
+  "context_refs": [
+    "docs/design.md"
+  ],
+  "priorities": [
+    {
+      "id": "t1",
+      "title": "演示任务",
+      "why": "演示 draft 合法形状",
+      "pr_split": {
+        "suggested_prs": 1,
+        "functional_pr": true
+      }
+    }
+  ],
+  "coverage": [
+    {
+      "task_id": "t1",
+      "dimension_kind": "face",
+      "dimension_id": "A",
+      "status": "covered",
+      "sc_ids": [
+        "sc-1"
+      ]
+    },
+    {
+      "task_id": "t1",
+      "dimension_kind": "face",
+      "dimension_id": "B",
+      "status": "covered",
+      "sc_ids": [
+        "sc-2"
+      ]
+    },
+    {
+      "task_id": "t1",
+      "dimension_kind": "gate",
+      "dimension_id": "format-gate",
+      "status": "covered",
+      "sc_ids": [
+        "sc-1",
+        "sc-2"
+      ]
+    },
+    {
+      "task_id": "t1",
+      "dimension_kind": "hardening",
+      "dimension_id": "3",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_new_mechanism",
+      "evidence": "无新机制"
+    }
+  ]
+}

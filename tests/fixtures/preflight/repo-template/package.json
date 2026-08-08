@@ -1,0 +1,14 @@
+{
+  "name": "preflight-fixture-repo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "6.0.2",
+    "vitest": "4.1.9"
+  }
+}

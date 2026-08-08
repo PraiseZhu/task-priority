@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "task-manifest.schema.json",
+  "$comment": "⚠ 本文件不被任何脚本执行（grep task-manifest.schema 全仓 0 消费者，2026-08-09 实测）——机器判据的真相源是 scripts/manifest-validate.mjs 的硬编码键集。两者必须保持同步，由 tests/manifest-validate.test.mjs 的键集一致性测试锁定；改任一文件后若测试红，说明两边漂移了。",
+  "title": "task-priority task-manifest 机器契约（v6 口径，两阶段 exact 契约）",
+  "description": "两阶段字段集由 manifest-validate.mjs 执行（--stage=draft|final）。draft 必备：schema_version/slug/goal/context_refs/priorities/scs/coverage，拒绝 waves/dispatch/receipts/manifest_core_hash/scs[].preflight 与任何未列键；final 追加 scs[].preflight/waves/dispatch/manifest_core_hash，receipts 可选。枚举（faces/dimension_id）由 lib/authority.mjs 动态提供，本 schema 不硬编码（判据所有权：manifest-validate 经 lib/cell-domain.mjs 独占执行）。reason_code/evidence/ui_prediction 刻意可选——必填性由 coverage-matrix 独占强制（所有权单一）。",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "string", "minLength": 1, "description": "两阶段必备" },
+    "slug": { "type": "string", "minLength": 1, "description": "两阶段必备；身份绑定键" },
+    "goal": { "type": "string", "minLength": 1, "description": "两阶段必备" },
+    "context_refs": { "type": "array", "items": { "type": "string" }, "description": "两阶段必备；可为空数组（任务可能无调研来源，键必须在场）" },
+    "manifest_core_hash": { "type": "string", "minLength": 1, "description": "final 阶段必备；计算时剔除（无环）" },
+    "priorities": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/priority" } },
+    "scs": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/sc" } },
+    "coverage": { "type": "array", "items": { "$ref": "#/definitions/coverageCell" }, "description": "两阶段必备；缺格由 coverage-matrix 独占判定" },
+    "waves": { "type": "array", "items": { "$ref": "#/definitions/wave" }, "description": "final 阶段必备" },
+    "dispatch": { "$ref": "#/definitions/dispatch", "description": "final 阶段必备" },
+    "receipts": { "type": "array", "description": "final 阶段可选（final-gate 后写，validator 不要求也不拒）" }
+  },
+  "additionalProperties": false,
+  "required": ["schema_version", "slug", "goal", "context_refs", "priorities", "scs", "coverage"],
+  "definitions": {
+    "priority": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "why": { "type": "string", "minLength": 1 },
+        "pr_split": {
+          "type": "object",
+          "properties": {
+            "suggested_prs": { "type": "integer", "minimum": 1 },
+            "functional_pr": { "type": "boolean" }
+          },
+          "required": ["suggested_prs", "functional_pr"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "title", "why", "pr_split"],
+      "additionalProperties": false
+    },
+    "sc": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "priority_id": { "type": "string", "minLength": 1, "description": "引用完整性：须 ∈ priorities[].id" },
+        "kind": { "type": "string", "enum": ["fix", "verify", "probe", "archive"] },
+        "granularity": { "type": "string", "enum": ["goal", "assertion", "anchor", "mutation"] },
+        "change": { "type": "string", "minLength": 1, "description": "三段式：change/holds/verify 均非空，写不出 verify 的 SC 一律拒收" },
+        "holds": { "type": "string", "minLength": 1 },
+        "verify": { "$ref": "#/definitions/verify" },
+        "expect": { "type": "string" },
+        "anchor_paths": { "type": "array", "items": { "type": "string" }, "description": "repo-relative POSIX；路径安全由 validator 强制（拒绝对/../反斜杠/NUL/空段）" },
+        "faces": { "type": "array", "items": { "type": "string" }, "description": "枚举 = authority FACES（可多值，保留 related faces）" },
+        "gates": { "type": "array", "items": { "type": "string" }, "description": "可选（2026-08-09）：该 SC 声明负责的 gate 闸，枚举 = authority GATES；某格 covered 必须由声明了它的 SC 支持（绑定判据归 coverage-matrix 独占）" },
+        "hardening_classes": { "type": "array", "items": { "type": "integer" }, "description": "可选（2026-08-09）：该 SC 声明负责的 hardening 类，值域 = authority HARDENING_CLASSES（数字）；绑定判据同上" },
+        "predicted_invariant": { "type": "string", "minLength": 1, "description": "kind=fix 必填非空（validator 按 kind 强制）" },
+        "predicted_primary_face": { "type": "string", "description": "kind=fix 必填；枚举 = authority FACES 且 ∈ 本 SC 的 faces（F28，validator 强制）" },
+        "depends_on": { "type": "array", "items": { "type": "string" }, "description": "可选；拓扑/未知 id/环归 waves-plan 判" },
+        "preflight": {
+          "type": "object",
+          "properties": {
+            "sc_id": { "type": "string", "description": "P0#3：receipt 声称验证的 SC id；final-gate 逐 SC 比对（防张冠李戴）" },
+            "verify_fingerprint": { "type": "string", "description": "P0#3：verify 命令规范化指纹（scripts/sc-preflight.mjs 的 verifyFingerprint 导出）；final-gate 与当前 manifest 该 SC 的 verify 命令重算比对，不等即拒" },
+            "repo_head": { "type": "string", "description": "跑 preflight 时的 git rev-parse HEAD；仅诊断，final-gate 不作等值判据" },
+            "status": { "type": "string", "description": "五态枚举由 sc-preflight 独占判定；validator 只判存在且为字符串" },
+            "note": { "type": "string" },
+            "disposition": { "type": "string" },
+            "exit_code": { "type": "integer", "description": "P0#3：sc-preflight 实跑退出码（red_ok/green_warn/infra_fail 时存在）" },
+            "output_sha": { "type": "string", "description": "P0#3：sc-preflight 实跑输出 sha256 前 12 位" }
+          },
+          "required": ["status", "note"],
+          "additionalProperties": false,
+          "description": "final 阶段必备；键集真相源 = scripts/manifest-validate.mjs 的 PREFLIGHT_KEYS（本 schema 不执行，键集一致性由 tests/manifest-validate.test.mjs 锁定）"
+        }
+      },
+      "required": ["id", "priority_id", "kind", "granularity", "change", "holds", "verify", "expect", "anchor_paths", "faces"],
+      "additionalProperties": false
+    },
+    "verify": {
+      "type": "object",
+      "properties": {
+        "cmd": { "type": "string", "minLength": 1, "description": "裸程序名：禁路径/禁前导 -" },
+        "args": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["cmd", "args"],
+      "additionalProperties": false
+    },
+    "coverageCell": {
+      "type": "object",
+      "properties": {
+        "task_id": { "type": "string", "description": "须 ∈ priorities[].id" },
+        "dimension_kind": { "type": "string", "enum": ["face", "gate", "hardening"] },
+        "dimension_id": { "type": "string", "description": "枚举源：face→FACES / gate→GATES / hardening→HARDENING_CLASSES（authority 动态）" },
+        "status": { "type": "string", "enum": ["covered", "n_a", "n_a_predicted"], "description": "n_a_predicted 域限（仅 B 维度）由 coverage-matrix 独占判定" },
+        "sc_ids": { "type": "array", "items": { "type": "string" }, "description": "covered 时非空、存在、同 task（validator 强制）" },
+        "reason_code": { "type": "string", "description": "刻意可选——必填由 coverage-matrix 独占强制（所有权单一）" },
+        "evidence": { "type": "string", "description": "刻意可选——同上" },
+        "ui_prediction": {
+          "type": "object",
+          "description": "B 维度载体；刻意可选——由 coverage-matrix 独占强制 + 派生比对（F34/F35）",
+          "properties": {
+            "input_paths": { "type": "array", "items": { "type": "string" } },
+            "registry_path": { "type": "string" },
+            "config_hash": { "type": "string" },
+            "touches_ui": { "type": "boolean" },
+            "matched_paths": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["input_paths", "registry_path", "config_hash", "touches_ui", "matched_paths"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["task_id", "dimension_kind", "dimension_id", "status", "sc_ids"],
+      "additionalProperties": false
+    },
+    "wave": {
+      "type": "object",
+      "properties": {
+        "wave": { "type": "integer", "minimum": 1 },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "group_id": { "type": "string", "minLength": 1 },
+              "sc_ids": { "type": "array", "items": { "type": "string" } },
+              "worker_count": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["group_id", "sc_ids", "worker_count"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["wave", "groups"],
+      "additionalProperties": false
+    },
+    "dispatch": {
+      "type": "object",
+      "properties": {
+        "capacity": { "type": "integer", "minimum": 1, "description": "authority 现读；等值比对归 waves 一致性/final-gate" },
+        "packets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "group_id": { "type": "string", "minLength": 1 },
+              "scs_inline": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "#/definitions/sc" },
+                "description": "完整 SC 原文：每个内联 SC 须与顶层同名 SC 逐字一致（集合为顶层子集）"
+              },
+              "allowed_paths": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+              "forbidden": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+              "verify_cmds": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+              "submit_format": { "type": "string", "minLength": 1 },
+              "instruction": { "type": "string", "minLength": 1, "description": "exact 含「用 goal skill 执行」" },
+              "needs_three_review": { "type": "boolean" },
+              "manifest_core_hash": { "type": "string", "minLength": 1, "description": "绑定锚；算 core hash 时剔除" }
+            },
+            "required": ["group_id", "scs_inline", "allowed_paths", "forbidden", "verify_cmds", "submit_format", "instruction", "needs_three_review", "manifest_core_hash"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["capacity", "packets"],
+      "additionalProperties": false
+    }
+  }
+}

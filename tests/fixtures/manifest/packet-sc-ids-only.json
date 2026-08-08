@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0.0",
+  "slug": "demo-final",
+  "goal": "演示 final 阶段合法 manifest（SC-6 第 17 支）",
+  "context_refs": [],
+  "manifest_core_hash": "demo-final-hash-0001",
+  "priorities": [
+    {
+      "id": "t1",
+      "title": "演示任务",
+      "why": "演示 final 合法形状",
+      "pr_split": {
+        "suggested_prs": 1,
+        "functional_pr": true
+      }
+    }
+  ],
+  "scs": [
+    {
+      "id": "sc-1",
+      "priority_id": "t1",
+      "kind": "fix",
+      "granularity": "goal",
+      "change": "实现 X",
+      "holds": "X 行为不变",
+      "verify": {
+        "cmd": "node",
+        "args": [
+          "--test"
+        ]
+      },
+      "expect": "pass",
+      "anchor_paths": [
+        "src/a.ts"
+      ],
+      "faces": [
+        "A"
+      ],
+      "predicted_invariant": "X 不回归",
+      "predicted_primary_face": "A",
+      "preflight": {
+        "status": "exists_not_run",
+        "note": "命令存在未实跑"
+      }
+    },
+    {
+      "id": "sc-2",
+      "priority_id": "t1",
+      "kind": "verify",
+      "granularity": "assertion",
+      "change": "验证 Y",
+      "holds": "Y 保持",
+      "verify": {
+        "cmd": "npm",
+        "args": [
+          "test"
+        ]
+      },
+      "expect": "pass",
+      "anchor_paths": [
+        "src/b.ts",
+        "src/sub/c.ts"
+      ],
+      "faces": [
+        "B",
+        "C"
+      ],
+      "preflight": {
+        "status": "green_warn",
+        "note": "绿但有警告",
+        "disposition": "接受"
+      }
+    }
+  ],
+  "coverage": [
+    {
+      "task_id": "t1",
+      "dimension_kind": "face",
+      "dimension_id": "A",
+      "status": "covered",
+      "sc_ids": [
+        "sc-1"
+      ]
+    },
+    {
+      "task_id": "t1",
+      "dimension_kind": "face",
+      "dimension_id": "B",
+      "status": "covered",
+      "sc_ids": [
+        "sc-2"
+      ]
+    },
+    {
+      "task_id": "t1",
+      "dimension_kind": "gate",
+      "dimension_id": "format-gate",
+      "status": "covered",
+      "sc_ids": [
+        "sc-1",
+        "sc-2"
+      ]
+    },
+    {
+      "task_id": "t1",
+      "dimension_kind": "hardening",
+      "dimension_id": "3",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_new_mechanism",
+      "evidence": "无新机制"
+    }
+  ],
+  "waves": [
+    {
+      "wave": 1,
+      "groups": [
+        {
+          "group_id": "g1",
+          "sc_ids": [
+            "sc-1",
+            "sc-2"
+          ],
+          "worker_count": 1
+        }
+      ]
+    }
+  ],
+  "dispatch": {
+    "capacity": 8,
+    "packets": [
+      {
+        "group_id": "g1",
+        "allowed_paths": [
+          "src/"
+        ],
+        "forbidden": [
+          "src/secret.ts"
+        ],
+        "verify_cmds": [
+          "cd src && node --test"
+        ],
+        "submit_format": "{status: PASS|BLOCKED, sc_results: [{sc_id, status, evidence}], changed_files: [...], residual_risks: [...]}",
+        "instruction": "用 goal skill 执行本派工包",
+        "needs_three_review": true,
+        "manifest_core_hash": "demo-final-hash-0001",
+        "sc_ids": [
+          "sc-1",
+          "sc-2"
+        ]
+      }
+    ]
+  }
+}

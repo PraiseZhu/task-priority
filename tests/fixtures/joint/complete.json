@@ -1,0 +1,765 @@
+{
+  "schema_version": "1.0.0",
+  "slug": "joint-complete",
+  "goal": "双闸全绿基线 fixture（SC-7 反向变异族对照组）",
+  "context_refs": [],
+  "priorities": [
+    {
+      "id": "P1",
+      "title": "图片接入 AI 读取",
+      "why": "owner 拍板优先级",
+      "pr_split": {
+        "suggested_prs": 2,
+        "functional_pr": true
+      }
+    },
+    {
+      "id": "P2",
+      "title": "渲染器资源泄漏修复",
+      "why": "渲染稳定性",
+      "pr_split": {
+        "suggested_prs": 1,
+        "functional_pr": false
+      }
+    }
+  ],
+  "scs": [
+    {
+      "id": "SC-1",
+      "priority_id": "P1",
+      "kind": "fix",
+      "granularity": "anchor",
+      "change": "把拖入画布的图片接入 AI 读取链路",
+      "holds": "拖入的图片可被 AI 读取且不再被吞",
+      "verify": {
+        "cmd": "node",
+        "args": [
+          "--test"
+        ]
+      },
+      "expect": "pass",
+      "anchor_paths": [
+        "src/app/App.tsx",
+        "src/lib/util.ts"
+      ],
+      "faces": [
+        "A",
+        "B",
+        "C"
+      ],
+      "gates": [
+        "format-gate",
+        "rule-compliance"
+      ],
+      "hardening_classes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "predicted_invariant": "拖入图片不被吞",
+      "predicted_primary_face": "B",
+      "preflight": {
+        "status": "green_warn",
+        "note": "命令存在且实跑绿",
+        "disposition": "接受"
+      }
+    },
+    {
+      "id": "SC-2",
+      "priority_id": "P1",
+      "kind": "verify",
+      "granularity": "assertion",
+      "change": "验证图片读取链路端到端",
+      "holds": "链路结果稳定",
+      "verify": {
+        "cmd": "npm",
+        "args": [
+          "test"
+        ]
+      },
+      "expect": "pass",
+      "anchor_paths": [
+        "src/canvas/Canvas.tsx",
+        "src/server/index.ts"
+      ],
+      "faces": [
+        "A",
+        "C"
+      ],
+      "gates": [
+        "security-privacy-gate",
+        "product-arch-gate"
+      ],
+      "hardening_classes": [],
+      "preflight": {
+        "status": "exists_not_run",
+        "note": "命令存在未实跑"
+      }
+    },
+    {
+      "id": "SC-3",
+      "priority_id": "P2",
+      "kind": "fix",
+      "granularity": "anchor",
+      "change": "修复渲染器对图片资源的引用泄漏",
+      "holds": "渲染器资源引用释放",
+      "verify": {
+        "cmd": "node",
+        "args": [
+          "--test"
+        ]
+      },
+      "expect": "pass",
+      "anchor_paths": [
+        "src/canvas/Canvas.tsx",
+        "src/render/useLeaferSpikeRenderer.ts"
+      ],
+      "faces": [
+        "B",
+        "C",
+        "D"
+      ],
+      "gates": [
+        "format-gate",
+        "rule-compliance",
+        "security-privacy-gate",
+        "product-arch-gate"
+      ],
+      "hardening_classes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "predicted_invariant": "渲染器不泄漏",
+      "predicted_primary_face": "B",
+      "preflight": {
+        "status": "green_warn",
+        "note": "命令存在且实跑绿",
+        "disposition": "接受"
+      }
+    }
+  ],
+  "coverage": [
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "A",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1",
+        "SC-2"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "B",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e",
+      "ui_prediction": {
+        "input_paths": [
+          "src/app/App.tsx",
+          "src/canvas/Canvas.tsx",
+          "src/lib/util.ts",
+          "src/server/index.ts"
+        ],
+        "registry_path": "/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot/scripts/ui-paths/registry.mivo.json",
+        "config_hash": "30ded181541746dc17b3d091000b7e50901ca34f1ad341f4ee668e3ce9be43f1",
+        "touches_ui": true,
+        "matched_paths": [
+          "src/app/App.tsx",
+          "src/canvas/Canvas.tsx"
+        ]
+      }
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "C",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1",
+        "SC-2"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "D",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_doc_surface",
+      "evidence": "本 task 无 SC 声明 face D（no_doc_surface）"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "E",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_claim_made",
+      "evidence": "本 task 无 SC 声明 face E（no_claim_made）"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "F",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_scope_risk",
+      "evidence": "本 task 无 SC 声明 face F（no_scope_risk）"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "face",
+      "dimension_id": "G",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_claim_made",
+      "evidence": "本 task 无 SC 声明 face G（no_claim_made）"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "gate",
+      "dimension_id": "format-gate",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "gate",
+      "dimension_id": "rule-compliance",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "gate",
+      "dimension_id": "security-privacy-gate",
+      "status": "covered",
+      "sc_ids": [
+        "SC-2"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "gate",
+      "dimension_id": "product-arch-gate",
+      "status": "covered",
+      "sc_ids": [
+        "SC-2"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "1",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_new_mechanism",
+      "evidence": "不引入新机制/新状态机"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "2",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "3",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "4",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "5",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "6",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "7",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "8",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "9",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P1",
+      "dimension_kind": "hardening",
+      "dimension_id": "10",
+      "status": "covered",
+      "sc_ids": [
+        "SC-1"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "face",
+      "dimension_id": "A",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_claim_made",
+      "evidence": "本 task 无 SC 声明 face A（no_claim_made）"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "face",
+      "dimension_id": "B",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e",
+      "ui_prediction": {
+        "input_paths": [
+          "src/canvas/Canvas.tsx",
+          "src/render/useLeaferSpikeRenderer.ts"
+        ],
+        "registry_path": "/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot/scripts/ui-paths/registry.mivo.json",
+        "config_hash": "30ded181541746dc17b3d091000b7e50901ca34f1ad341f4ee668e3ce9be43f1",
+        "touches_ui": true,
+        "matched_paths": [
+          "src/canvas/Canvas.tsx",
+          "src/render/useLeaferSpikeRenderer.ts"
+        ]
+      }
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "face",
+      "dimension_id": "C",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "face",
+      "dimension_id": "D",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "face",
+      "dimension_id": "E",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_claim_made",
+      "evidence": "本 task 无 SC 声明 face E（no_claim_made）"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "face",
+      "dimension_id": "F",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_scope_risk",
+      "evidence": "本 task 无 SC 声明 face F（no_scope_risk）"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "face",
+      "dimension_id": "G",
+      "status": "n_a",
+      "sc_ids": [],
+      "reason_code": "no_claim_made",
+      "evidence": "本 task 无 SC 声明 face G（no_claim_made）"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "gate",
+      "dimension_id": "format-gate",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "gate",
+      "dimension_id": "rule-compliance",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "gate",
+      "dimension_id": "security-privacy-gate",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "gate",
+      "dimension_id": "product-arch-gate",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "1",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "2",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "3",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "4",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "5",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "6",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "7",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "8",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "9",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    },
+    {
+      "task_id": "P2",
+      "dimension_kind": "hardening",
+      "dimension_id": "10",
+      "status": "covered",
+      "sc_ids": [
+        "SC-3"
+      ],
+      "evidence": "e"
+    }
+  ],
+  "waves": [
+    {
+      "wave": 1,
+      "groups": [
+        {
+          "group_id": "g1",
+          "sc_ids": [
+            "SC-1",
+            "SC-2",
+            "SC-3"
+          ],
+          "worker_count": 2
+        }
+      ]
+    }
+  ],
+  "dispatch": {
+    "capacity": 8,
+    "packets": [
+      {
+        "group_id": "g1",
+        "scs_inline": [
+          {
+            "id": "SC-1",
+            "priority_id": "P1",
+            "kind": "fix",
+            "granularity": "anchor",
+            "change": "把拖入画布的图片接入 AI 读取链路",
+            "holds": "拖入的图片可被 AI 读取且不再被吞",
+            "verify": {
+              "cmd": "node",
+              "args": [
+                "--test"
+              ]
+            },
+            "expect": "pass",
+            "anchor_paths": [
+              "src/app/App.tsx",
+              "src/lib/util.ts"
+            ],
+            "faces": [
+              "A",
+              "B",
+              "C"
+            ],
+            "gates": [
+              "format-gate",
+              "rule-compliance"
+            ],
+            "hardening_classes": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "predicted_invariant": "拖入图片不被吞",
+            "predicted_primary_face": "B",
+            "preflight": {
+              "status": "green_warn",
+              "note": "命令存在且实跑绿",
+              "disposition": "接受"
+            }
+          },
+          {
+            "id": "SC-2",
+            "priority_id": "P1",
+            "kind": "verify",
+            "granularity": "assertion",
+            "change": "验证图片读取链路端到端",
+            "holds": "链路结果稳定",
+            "verify": {
+              "cmd": "npm",
+              "args": [
+                "test"
+              ]
+            },
+            "expect": "pass",
+            "anchor_paths": [
+              "src/canvas/Canvas.tsx",
+              "src/server/index.ts"
+            ],
+            "faces": [
+              "A",
+              "C"
+            ],
+            "gates": [
+              "security-privacy-gate",
+              "product-arch-gate"
+            ],
+            "hardening_classes": [],
+            "preflight": {
+              "status": "exists_not_run",
+              "note": "命令存在未实跑"
+            }
+          },
+          {
+            "id": "SC-3",
+            "priority_id": "P2",
+            "kind": "fix",
+            "granularity": "anchor",
+            "change": "修复渲染器对图片资源的引用泄漏",
+            "holds": "渲染器资源引用释放",
+            "verify": {
+              "cmd": "node",
+              "args": [
+                "--test"
+              ]
+            },
+            "expect": "pass",
+            "anchor_paths": [
+              "src/canvas/Canvas.tsx",
+              "src/render/useLeaferSpikeRenderer.ts"
+            ],
+            "faces": [
+              "B",
+              "C",
+              "D"
+            ],
+            "gates": [
+              "format-gate",
+              "rule-compliance",
+              "security-privacy-gate",
+              "product-arch-gate"
+            ],
+            "hardening_classes": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "predicted_invariant": "渲染器不泄漏",
+            "predicted_primary_face": "B",
+            "preflight": {
+              "status": "green_warn",
+              "note": "命令存在且实跑绿",
+              "disposition": "接受"
+            }
+          }
+        ],
+        "allowed_paths": [
+          "src/"
+        ],
+        "forbidden": [
+          "src/secret.ts"
+        ],
+        "verify_cmds": [
+          "cd src && node --test"
+        ],
+        "submit_format": "{status: PASS|BLOCKED, sc_results: [{sc_id, status, evidence}], changed_files: [...], residual_risks: [...]}",
+        "instruction": "用 goal skill 执行本派工包",
+        "needs_three_review": true,
+        "manifest_core_hash": "a5ef2ccbb4df65401b8ec95190c92d0dcb60eb746e8cf45658f50d2d9c7d1c14"
+      }
+    ]
+  },
+  "manifest_core_hash": "a5ef2ccbb4df65401b8ec95190c92d0dcb60eb746e8cf45658f50d2d9c7d1c14"
+}

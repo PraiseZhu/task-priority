@@ -1,0 +1,11 @@
+{
+  "name": "probe-fixture-full",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "test:unit": "vitest run",
+    "codemap": "node scripts/codemap.mjs --full"
+  }
+}

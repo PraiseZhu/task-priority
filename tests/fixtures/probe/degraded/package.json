@@ -1,0 +1,10 @@
+{
+  "name": "probe-fixture-degraded",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b",
+    "test:unit": "vitest run",
+    "lint": "eslint ."
+  }
+}
