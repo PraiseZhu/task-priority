@@ -20,12 +20,15 @@
 // 用法：
 //   node scripts/probe.mjs --repo-dir <目标仓> [--paths a,b,c] [--keywords k1,k2]
 //       [--generated-at-source "<调用方注入的时间文本，缺省 null>"]
+//       [--out <路径>]
 //
 // stdout 只输出最终 JSON（机器消费）；stderr 打人类可读提示。
+// --out 把与 stdout 相同的 JSON 原子写入该路径（tmp+rename）；缺省仍只 stdout。
+// 约定路径 ~/.claude/.goal/<slug>/probe.json 由调用方传入，脚本不猜 slug。
 
 import { execFile } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join, sep, posix } from "node:path";
+import { existsSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join, sep, posix } from "node:path";
 import { promisify } from "node:util";
 
 const execFileP = promisify(execFile);
@@ -40,7 +43,7 @@ const SKIP_DIRS = new Set([".git", "node_modules", "dist", "build", ".venv", "__
 
 // ── CLI 解析（手写，零依赖）──
 function parseArgs(argv) {
-  const out = { repoDir: null, paths: [], keywords: [], generatedAtSource: null };
+  const out = { repoDir: null, paths: [], keywords: [], generatedAtSource: null, outPath: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const next = () => {
@@ -51,9 +54,10 @@ function parseArgs(argv) {
     else if (a === "--paths") out.paths = next().split(",").map((s) => s.trim()).filter(Boolean);
     else if (a === "--keywords") out.keywords = next().split(",").map((s) => s.trim()).filter(Boolean);
     else if (a === "--generated-at-source") out.generatedAtSource = next();
+    else if (a === "--out") out.outPath = next();
     else if (a === "--help" || a === "-h") {
       console.error(
-        "用法: node scripts/probe.mjs --repo-dir <目标仓> [--paths a,b,c] [--keywords k1,k2] [--generated-at-source <文本>]"
+        "用法: node scripts/probe.mjs --repo-dir <目标仓> [--paths a,b,c] [--keywords k1,k2] [--generated-at-source <文本>] [--out <路径>]"
       );
       process.exit(0);
     } else throw new Error(`未知参数: ${a}`);
@@ -399,7 +403,14 @@ async function main() {
   // ── ④ 候选池 ──
   out.available_verify_cmds = enumerateScripts(repoDir);
 
-  process.stdout.write(JSON.stringify(out, null, 2) + "\n");
+  const json = JSON.stringify(out, null, 2) + "\n";
+  if (args.outPath) {
+    const dest = args.outPath;
+    const tmp = `${dest}.tmp`;
+    writeFileSync(tmp, json);
+    renameSync(tmp, dest);
+  }
+  process.stdout.write(json);
 }
 
 main().catch((e) => {

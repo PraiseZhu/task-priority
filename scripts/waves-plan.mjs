@@ -11,7 +11,9 @@
 //      （路径不相交但语义有序的情形，v3 之前会被错误并行）
 //   4. 依赖成环（SC 级或组级）→ exit 2
 //   5. 未知依赖 id（depends_on 引用不存在的 SC id）→ exit 2
-//   6. kind 分三池: probe（产出 fix 消费的信息，恒在**首波**，早于所有 fix）→ fix →
+//   6. kind 分三池: probe（产出 fix 消费的信息，恒在**首波**，早于所有 fix；
+//      kind=probe ≠ approve-exec 的 PreWalk 交卷类——后者是 first_edit 四键现场，
+//      本模块的 probe 组执行期仍走 exec 三键交卷）→ fix →
 //      verify/archive（尾波区域，base = 前波集成结果）。probe/archive 组间 depends_on
 //      各自池内分层（被依赖者先）; verify/archive 恒在 fix 后、probe 恒在 fix 前
 //      （裁决二: probe 默认首波，即使 fix 无显式 depends_on 依赖它）
