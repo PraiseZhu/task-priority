@@ -196,3 +196,32 @@ test("参数校验：缺 --repo-dir 与绝对路径关注路径均 exit 2（fail
   const dotdot = await run(process.execPath, [PROBE, "--repo-dir", dir, "--paths", "src/../store"], SKILL_ROOT);
   assert.equal(dotdot.code, 2, ".. 路径应 exit 2");
 });
+
+test("--out 原子落盘且 stdout 与文件逐字相同；缺省不写盘；未知参数拒", async (t) => {
+  const dir = await makeRepo(path.join(FIXTURES, "full"));
+  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const outDir = await fs.mkdtemp(path.join(os.tmpdir(), "probe-out-"));
+  t.after(() => fs.rm(outDir, { recursive: true, force: true }));
+  const outPath = path.join(outDir, "probe.json");
+
+  const withOut = await execFileP(process.execPath, [
+    PROBE, "--repo-dir", dir, "--generated-at-source", INJECTED_TS, "--out", outPath,
+  ], { cwd: SKILL_ROOT, maxBuffer: 64 * 1024 * 1024 });
+  const stdout = String(withOut.stdout);
+  const disk = await fs.readFile(outPath, "utf8");
+  assert.equal(disk, stdout, "--out 文件必须与 stdout 逐字相同");
+  assert.equal(stdout.trim().startsWith("{"), true, "stdout 仍只输出最终 JSON");
+  assert.ok(!stdout.includes("progress"), "--out 不得把进度打进 stdout");
+  JSON.parse(disk);
+
+  const noOutDir = await fs.mkdtemp(path.join(os.tmpdir(), "probe-noout-"));
+  t.after(() => fs.rm(noOutDir, { recursive: true, force: true }));
+  const stray = path.join(noOutDir, "probe.json");
+  await execFileP(process.execPath, [
+    PROBE, "--repo-dir", dir, "--generated-at-source", INJECTED_TS,
+  ], { cwd: SKILL_ROOT, maxBuffer: 64 * 1024 * 1024 });
+  await assert.rejects(fs.stat(stray), "缺省不得写盘");
+
+  const unknown = await run(process.execPath, [PROBE, "--repo-dir", dir, "--slice", "x"], SKILL_ROOT);
+  assert.equal(unknown.code, 2, "未知参数应 exit 2");
+});

@@ -171,7 +171,9 @@ ui_prediction: {
 
 ### Phase 1 · 脚本抓数据
 
-probe.mjs（codemap 反向依赖 / git 热区 / 测试映射 / scripts 枚举）；`node <SKILL_ROOT>/scripts/lib/ledger-query.mjs` 读台账弹药（top-occurrences 按复发频次降序 + 本次消费快照的 ledger fingerprint；`TASK_PRIORITY_SKILL_ROOT` 可重定向隔离；`BOOTSTRAP_EMPTY_LEDGER` = 台账尚未开始积累，**不等于**「已查过、无逃逸」）；authority 现读（FACES / DEFAULT_REQUIREMENTS / HARDENING_CLASSES / familyKeyOf / recomputeArtifactHash / matchUiPaths / capacity）。**authority 失败即停**（`AUTHORITY_UNREACHABLE`），不往下写。
+probe.mjs（codemap 反向依赖 / git 热区 / 测试映射 / scripts 枚举）。**必须**带 `--out ~/.claude/.goal/<slug>/probe.json` 把探测 JSON 原子落成 sibling 产物；stdout 契约不变（只输出最终 JSON）。计划期 preflight 仍 `exists_not_run`。禁止把探测切片写进 `dispatch.packets`（PACKET_KEYS 本轮不动）；禁止在计划期填写 `first_edit`（那是 approve-exec 的 PreWalk 交卷，不是本 skill 的 `kind=probe`）。`kind=probe` = 信息产出 SC（waves-plan 排进首波 p1..，执行期仍走 exec 三键交卷）**≠** PreWalk。
+
+probe.mjs（调用细节：codemap 反向依赖 / git 热区 / 测试映射 / scripts 枚举）；`node <SKILL_ROOT>/scripts/lib/ledger-query.mjs` 读台账弹药（top-occurrences 按复发频次降序 + 本次消费快照的 ledger fingerprint；`TASK_PRIORITY_SKILL_ROOT` 可重定向隔离；`BOOTSTRAP_EMPTY_LEDGER` = 台账尚未开始积累，**不等于**「已查过、无逃逸」）；authority 现读（FACES / DEFAULT_REQUIREMENTS / HARDENING_CLASSES / familyKeyOf / recomputeArtifactHash / matchUiPaths / capacity）。**authority 失败即停**（`AUTHORITY_UNREACHABLE`），不往下写。
 
 ### Phase 2 · 优先级 + SC 起草
 
@@ -218,7 +220,7 @@ Agent 工具，subagent_type=general-purpose，model=sonnet 必须显式传
 
 ### Phase 5 · 预验证 + 分组 + packets 生成
 
-sc-preflight 五态（`fabricated` / `red_ok` / `green_warn` / `exists_not_run` / `infra_fail`），实跑在**一次性隔离 worktree** 内（cwd 钉死该 worktree，跑完 `git worktree remove --force` 并校验已删）；green_warn 必写 disposition；waves-plan 出波次；**生成全部 packets**（此后不新增/不改）。
+sc-preflight 五态（`fabricated` / `red_ok` / `green_warn` / `exists_not_run` / `infra_fail`），实跑在**一次性隔离 worktree** 内（cwd 钉死该 worktree，跑完 `git worktree remove --force` 并校验已删）；green_warn 必写 disposition；waves-plan 出波次；**生成全部 packets**（此后不新增/不改）。Phase 1 的 `probe.json` 是 sibling 产物，**不得**写进 hashed `dispatch.packets`；本轮不改 `PACKET_KEYS`。
 
 **T1 边界声明②**：preflight **非沙箱**——一次性隔离 worktree 只挡「对仓内工作树的写入」，**不隔离进程/网络/全局缓存/全局配置**。实跑任何 runner 都可能有副作用，选择白名单命令时按此评估。
 
