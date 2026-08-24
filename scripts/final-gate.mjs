@@ -54,6 +54,7 @@ import { join, dirname } from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { isDeepStrictEqual } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isDirectRun } from './lib/is-direct-run.mjs';
 import { loadAuthority } from './lib/authority.mjs';
 import { manifestCoreHash, planHash } from './lib/hashing.mjs';
 import { renderPlanProjection, extractPlanProjection } from './lib/plan-projection.mjs';
@@ -563,7 +564,7 @@ async function main() {
   process.exit(0);
 }
 
-const isCLI = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isCLI = isDirectRun(import.meta.url);
 if (isCLI) {
   main();
 }

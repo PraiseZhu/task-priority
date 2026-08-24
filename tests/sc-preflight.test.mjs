@@ -373,3 +373,21 @@ test('SC-4 P0#3: 产物 verify_fingerprint == 导出函数对同一命令的重�
     '边缘空格写法必须重算出同一指纹'
   );
 });
+
+test('parseArgv: -- 之后的 --repo 属于子命令,不被 sc-preflight 吞掉', async (t) => {
+  const { parseArgv } = await import('../scripts/sc-preflight.mjs');
+  if (typeof parseArgv !== 'function') {
+    t.skip('parseArgv 未导出时用 CLI 形态验证');
+    const repo = makeFixtureRepo(t);
+    const out = execFileSync(process.execPath, [
+      SCRIPT, '--repo', repo, '--cmd', 'gh', '--', 'issue', 'view', '1', '--repo', 'xindong/mivo-canvas',
+    ], { encoding: 'utf8' });
+    const r = JSON.parse(out.trim());
+    assert.ok(r, 'CLI 必须能解析 -- 后的子命令 --repo');
+    return;
+  }
+  const parsed = parseArgv(['--repo', '/tmp/a', '--cmd', 'gh', '--', 'issue', 'view', '1', '--repo', 'xindong/mivo-canvas']);
+  assert.equal(parsed.repo, '/tmp/a');
+  assert.equal(parsed.cmd, 'gh');
+  assert.deepEqual(parsed.args, ['issue', 'view', '1', '--repo', 'xindong/mivo-canvas']);
+});

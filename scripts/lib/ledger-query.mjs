@@ -30,6 +30,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isDirectRun } from './is-direct-run.mjs';
 
 const SKILL_ROOT = process.env.TASK_PRIORITY_SKILL_ROOT
   ? resolve(process.env.TASK_PRIORITY_SKILL_ROOT)
@@ -131,7 +132,7 @@ function main() {
 }
 
 // isCLI guard（同 sc-preflight 惯例）：被测试/未来消费方 import 时不执行 CLI 入口。
-const isCLI = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isCLI = isDirectRun(import.meta.url);
 if (isCLI) {
   main();
 }

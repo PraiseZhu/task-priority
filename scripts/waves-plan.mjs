@@ -38,6 +38,7 @@ import { readFileSync, writeFileSync, renameSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isDirectRun } from './lib/is-direct-run.mjs';
 import { loadAuthority } from './lib/authority.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -376,7 +377,7 @@ export async function buildWavesPlan({ scs, capacity = null, hubShare = null, an
 // capacity 不接受 CLI 自报（SC-5: 一律 authority 现读）。
 // exit code: 0 正常; 2 fail-closed（环 / 未知 id / 输入非法 / authority 不可达）。
 // ─────────────────────────────────────────────────────────────────────────────
-const IS_MAIN = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const IS_MAIN = isDirectRun(import.meta.url);
 if (IS_MAIN) {
   const args = {};
   const argv = process.argv.slice(2);
