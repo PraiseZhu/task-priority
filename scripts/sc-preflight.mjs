@@ -54,6 +54,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isDirectRun } from './lib/is-direct-run.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG = JSON.parse(
@@ -400,7 +401,10 @@ function parseArgv(argv) {
   let i = 0;
   while (i < argv.length) {
     const a = argv[i];
-    if (a === '--repo') {
+    if (a === '--') {
+      args.push(...argv.slice(i + 1));
+      break;
+    } else if (a === '--repo') {
       repo = argv[++i];
     } else if (a === '--cmd') {
       cmd = argv[++i];
@@ -556,7 +560,9 @@ async function diagnose(repo, cmd, args, timeoutMs) {
 
 // isCLI guard：被 final-gate import 时（P0#3 指纹核对）不执行 CLI 入口，
 // 只导出 verifyFingerprint 供重算比对。原无条件 main() 会让 import 即死（process.exit）。
-const isCLI = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isCLI = isDirectRun(import.meta.url);
 if (isCLI) {
   main();
 }
+
+export { parseArgv };

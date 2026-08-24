@@ -41,6 +41,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isDirectRun } from './is-direct-run.mjs';
 import { manifestCoreHash, draftAncestorHash } from './hashing.mjs';
 // 注：ledger 指纹由 lib/ledger-query.mjs 产出（Phase 1 已跑），本模块只消费其输出形状
 // （`ledger-` + 10 hex，见 isFingerprintShape）——不另写第二份查询。
@@ -162,7 +163,7 @@ export function scaffoldReviewReceipt({ draftManifest, slug, ledgerFp, reviewerC
   }
   return {
     slug,
-    draft_manifest_core_hash: manifestCoreHash(draftManifest),
+    draft_manifest_core_hash: draftAncestorHash(draftManifest),
     gap_catalog_fingerprint: gapCatalogFingerprint(gapText),
     ledger_fingerprint: ledgerFp,
     reviewer_count: reviewerCount,
@@ -217,7 +218,7 @@ function main() {
   process.stdout.write(text);
 }
 
-const isCLI = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isCLI = isDirectRun(import.meta.url);
 if (isCLI) {
   main();
 }
