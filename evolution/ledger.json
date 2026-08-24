@@ -1,1 +1,135 @@
-{"version":1,"entries":[]}
+{
+  "version": 1,
+  "entries": [
+    {
+      "fingerprint": "cli-symlink-isolation-guard-noop",
+      "tier": "auto",
+      "title": "5 个脚本的 isCLI 在软链安装下静默空转",
+      "detail": "import.meta.url === pathToFileURL(argv[1]) 在 ~/.claude/skills/task-priority 软链下永不相等，rc=0 假绿。",
+      "proposal": null,
+      "status": "landed",
+      "commit": null,
+      "note": "[decided:2026-08-24] landed-effective task-priority#2 merge ba65e82：is-direct-run.mjs 两侧 realpathSync。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.105Z",
+      "lastSeen": "2026-08-24T09:12:34.105Z"
+    },
+    {
+      "fingerprint": "review-receipt-hash-shape-mismatch",
+      "tier": "auto",
+      "title": "review-receipt 用 manifestCoreHash 而非 draftAncestorHash",
+      "detail": "喂 final 形态 manifest 静默产出错 hash，拖到 Phase 6c 才炸。",
+      "proposal": null,
+      "status": "landed",
+      "commit": null,
+      "note": "[decided:2026-08-24] landed-effective task-priority#2 merge ba65e82：scaffold 改用 draftAncestorHash。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.141Z",
+      "lastSeen": "2026-08-24T09:12:34.141Z"
+    },
+    {
+      "fingerprint": "sc-preflight-argv-swallows-subcommand-flags",
+      "tier": "auto",
+      "title": "sc-preflight parseArgv 吞子命令 --repo/--cmd",
+      "detail": "无 -- 终止符，指纹按截短命令算。",
+      "proposal": null,
+      "status": "landed",
+      "commit": null,
+      "note": "[decided:2026-08-24] landed-effective task-priority#2 merge ba65e82：parseArgv 遇 -- 停止扫自身 flag。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.183Z",
+      "lastSeen": "2026-08-24T09:12:34.183Z"
+    },
+    {
+      "fingerprint": "probe-sc-depends-on-fix-unschedulable",
+      "tier": "auto",
+      "title": "probe 依赖 fix 构成不可满足波序",
+      "detail": "PROBE_DEPENDS_LATE 已在 waves-plan 抛错。",
+      "proposal": null,
+      "status": "landed",
+      "commit": null,
+      "note": "[decided:2026-08-24] landed-effective waves-plan.mjs 已抛 PROBE_DEPENDS_LATE，测试覆盖。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.226Z",
+      "lastSeen": "2026-08-24T09:12:34.226Z"
+    },
+    {
+      "fingerprint": "sc-verify-cmd-structurally-unpassable-at-plan-time",
+      "tier": "proposal",
+      "title": "verify_cmds 计划期就不可能通过",
+      "detail": "双载体自指或被测对象在别仓；exists_not_run 放行后执行期才炸。属增强不是现存 bug。",
+      "proposal": null,
+      "status": "tracked",
+      "commit": null,
+      "note": "[decided:2026-08-24] track 增强提案。升格条件：再出现 1 次计划期不可通过的 verify_cmds 进到执行期。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.271Z",
+      "lastSeen": "2026-08-24T09:12:34.271Z"
+    },
+    {
+      "fingerprint": "plan-anchor-secondhand-lineno-drift",
+      "tier": "proposal",
+      "title": "起草期采信二手 file:line 锚点未复核",
+      "detail": "人写坏 SC，不是 skill 代码缺陷。",
+      "proposal": null,
+      "status": "rejected",
+      "commit": null,
+      "note": "[decided:2026-08-24] reject(非缺陷) 人写坏锚点。不再重提；重提唯一合法条件=skill 起草器自动采信二手 file:line。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.314Z",
+      "lastSeen": "2026-08-24T09:12:34.314Z"
+    },
+    {
+      "fingerprint": "silenced-checkout-error-yields-phantom-zero-measurement",
+      "tier": "proposal",
+      "title": "循环内 checkout 被 2>/dev/null 吞掉量出 counted=0",
+      "detail": "人写坏命令，不是 skill 代码缺陷。",
+      "proposal": null,
+      "status": "rejected",
+      "commit": null,
+      "note": "[decided:2026-08-24] reject(非缺陷) 人写坏命令。不再重提；重提唯一合法条件=skill 脚本自己吞 checkout 错误。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.357Z",
+      "lastSeen": "2026-08-24T09:12:34.357Z"
+    },
+    {
+      "fingerprint": "equivalence-criterion-tree-vs-content-under-base-drift",
+      "tier": "proposal",
+      "title": "验收把内容等价误写成树等价",
+      "detail": "人写坏判据，不是 skill 代码缺陷。",
+      "proposal": null,
+      "status": "rejected",
+      "commit": null,
+      "note": "[decided:2026-08-24] reject(非缺陷) 人写坏判据。不再重提；重提唯一合法条件=skill 默认模板写成树等价。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.400Z",
+      "lastSeen": "2026-08-24T09:12:34.400Z"
+    },
+    {
+      "fingerprint": "plan-drafted-against-stale-local-checkout",
+      "tier": "proposal",
+      "title": "起草期读本机 stale 工作树当现值",
+      "detail": "人写坏计划，不是 skill 代码缺陷。",
+      "proposal": null,
+      "status": "rejected",
+      "commit": null,
+      "note": "[decided:2026-08-24] reject(非缺陷) 人读 stale 树。不再重提；重提唯一合法条件=skill 强制读工作树现值。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.443Z",
+      "lastSeen": "2026-08-24T09:12:34.443Z"
+    },
+    {
+      "fingerprint": "sc-holds-self-contradiction-forces-observability-edit",
+      "tier": "proposal",
+      "title": "holds 同时要求留档可恢复与工作树干净",
+      "detail": "人写坏 holds，不是 skill 代码缺陷。",
+      "proposal": null,
+      "status": "rejected",
+      "commit": null,
+      "note": "[decided:2026-08-24] reject(非缺陷) 人写坏 holds。不再重提；重提唯一合法条件=skill 生成自相矛盾 holds。",
+      "occurrences": 1,
+      "firstSeen": "2026-08-24T09:12:34.485Z",
+      "lastSeen": "2026-08-24T09:12:34.485Z"
+    }
+  ]
+}
