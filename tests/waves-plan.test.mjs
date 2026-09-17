@@ -19,7 +19,8 @@ import { loadAuthority } from '../scripts/lib/authority.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SKILL_ROOT = join(HERE, '..');
 const WAVES_SCRIPT = join(SKILL_ROOT, 'scripts', 'waves-plan.mjs');
-const REAL_AUTOPILOT = '/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot';
+const DEFAULT_CONFIG = JSON.parse(readFileSync(join(SKILL_ROOT, 'config', 'defaults.json'), 'utf8'));
+const REAL_AUTOPILOT = DEFAULT_CONFIG.prAutopilotRoot;
 const ORCH_PATH = join(REAL_AUTOPILOT, 'config', 'orchestration.json');
 const FIXTURES = join(HERE, 'fixtures', 'waves');
 
