@@ -7,7 +7,7 @@
 // 运行：cd <SKILL_ROOT> && node --test tests/authority-import.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -29,7 +29,8 @@ import {
 } from '../scripts/lib/repo-identity.mjs';
 
 const SKILL_ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const PR_AUTOPILOT_ROOT = '/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot';
+const DEFAULT_CONFIG = JSON.parse(readFileSync(path.join(SKILL_ROOT, 'config', 'defaults.json'), 'utf8'));
+const PR_AUTOPILOT_ROOT = DEFAULT_CONFIG.prAutopilotRoot;
 const MIVO_DIR = '/Users/praise/AI-Agent/Claude/projects/Project MivoCanvas';
 
 function tmpConfigFile({ prAutopilotRoot, uiRegistryDir }) {

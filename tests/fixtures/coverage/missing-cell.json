@@ -137,7 +137,7 @@
           "src/lib/util.ts",
           "src/server/index.ts"
         ],
-        "registry_path": "/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot/scripts/ui-paths/registry.mivo.json",
+        "registry_path": "/Users/praise/AI-Agent/Claude/archive/projects/pr-autopilot-live/scripts/ui-paths/registry.mivo.json",
         "config_hash": "30ded181541746dc17b3d091000b7e50901ca34f1ad341f4ee668e3ce9be43f1",
         "touches_ui": true,
         "matched_paths": [

@@ -17,12 +17,13 @@ import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { recomputeArtifactHash } from '/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot/scripts/consensus-gate.mjs';
+import { loadAuthority } from '../scripts/lib/authority.mjs';
 import { manifestCoreHash, planHash } from '../scripts/lib/hashing.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = resolve(HERE, '../scripts/gap-backfill.mjs');
 const GH_STUB = resolve(HERE, 'fixtures/ledger/gh-stub.mjs');
+const { recomputeArtifactHash } = await loadAuthority();
 
 const git = (cwd, args) =>
   execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf8' }).trim();

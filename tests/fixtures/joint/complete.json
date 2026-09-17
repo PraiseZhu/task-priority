@@ -180,7 +180,7 @@
           "src/lib/util.ts",
           "src/server/index.ts"
         ],
-        "registry_path": "/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot/scripts/ui-paths/registry.mivo.json",
+        "registry_path": "/Users/praise/AI-Agent/Claude/archive/projects/pr-autopilot-live/scripts/ui-paths/registry.mivo.json",
         "config_hash": "30ded181541746dc17b3d091000b7e50901ca34f1ad341f4ee668e3ce9be43f1",
         "touches_ui": true,
         "matched_paths": [
@@ -398,7 +398,7 @@
           "src/canvas/Canvas.tsx",
           "src/render/useLeaferSpikeRenderer.ts"
         ],
-        "registry_path": "/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot/scripts/ui-paths/registry.mivo.json",
+        "registry_path": "/Users/praise/AI-Agent/Claude/archive/projects/pr-autopilot-live/scripts/ui-paths/registry.mivo.json",
         "config_hash": "30ded181541746dc17b3d091000b7e50901ca34f1ad341f4ee668e3ce9be43f1",
         "touches_ui": true,
         "matched_paths": [
@@ -757,9 +757,9 @@
         "submit_format": "{status: PASS|BLOCKED, sc_results: [{sc_id, status, evidence}], changed_files: [...], residual_risks: [...]}",
         "instruction": "用 goal skill 执行本派工包",
         "needs_three_review": true,
-        "manifest_core_hash": "a5ef2ccbb4df65401b8ec95190c92d0dcb60eb746e8cf45658f50d2d9c7d1c14"
+        "manifest_core_hash": "43f9512cd95b45c35632d60d6f87f20aa95744aaf9db65b4e8a0e810e29483f3"
       }
     ]
   },
-  "manifest_core_hash": "a5ef2ccbb4df65401b8ec95190c92d0dcb60eb746e8cf45658f50d2d9c7d1c14"
+  "manifest_core_hash": "43f9512cd95b45c35632d60d6f87f20aa95744aaf9db65b4e8a0e810e29483f3"
 }

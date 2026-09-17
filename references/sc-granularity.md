@@ -65,7 +65,7 @@
 
 ## 必备 pre-submit SC 组（模板，每个 priority 三条）
 
-> 每个 `functional_pr=true` 的 priority 必须带这三条 `kind=verify` 的 SC（SKILL.md「必备 pre-submit SC 组」）。它们把 submit-pr 的三个机器闸搬到真实 candidate 上——这是 800 行闸最早可被真实判定的时点；计划期无 candidate 无法预跑，任何预演都只会假 PASS。`<prAutopilotRoot>` 本机 = `/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot`（`config/defaults.json` 硬编码），其余 `<...>` 为执行期实参（候选仓路径 / PR 标题与正文文件）。
+> 每个 `functional_pr=true` 的 priority 必须带这三条 `kind=verify` 的 SC（SKILL.md「必备 pre-submit SC 组」）。它们把 submit-pr 的三个机器闸搬到真实 candidate 上——这是 800 行闸最早可被真实判定的时点；计划期无 candidate 无法预跑，任何预演都只会假 PASS。`<prAutopilotRoot>` 由 `config/defaults.json` 的 `prAutopilotRoot` 决定，其余 `<...>` 为执行期实参（候选仓路径 / PR 标题与正文文件）。
 
 ```json
 [

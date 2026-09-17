@@ -1,7 +1,7 @@
 {
   "_comment": "task-priority skill 配置。capacity 刻意不在此——由 lib/authority.mjs 从 pr-autopilot/config/orchestration.json 现读(单一真相源,计划 F5)。registry 也不在此硬编码映射——由 lib/authority.mjs 扫描 registry.*.json 的 repo 字段派生(计划 F35)。",
   "schema_version": "v1",
-  "prAutopilotRoot": "/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot",
+  "prAutopilotRoot": "/Users/praise/AI-Agent/Claude/archive/projects/pr-autopilot-live",
   "uiRegistryDir": "scripts/ui-paths",
   "preflightTimeoutMs": 120000,
   "worktreeTmpRoot": "/tmp/task-priority-preflight",
