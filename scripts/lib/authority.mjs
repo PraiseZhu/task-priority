@@ -2,7 +2,8 @@
 //
 // 本文件是 task-priority 全链路的地基：FACES / gates / HARDENING_CLASSES /
 // familyKeyOf / recomputeArtifactHash / matchUiPaths / capacity 一律从
-// pr-autopilot **动态引用 + shape/value 校验**，**禁止内置任何权威常量副本**
+// pr-autopilot **动态引用 + shape/value 校验**（判据源默认是随仓 vendored 的
+// vendor/pr-autopilot，来源与逐文件 hash 见 vendor/pr-autopilot/VENDOR.json），**禁止内置任何权威常量副本**
 // （复述权威 = 计划明令禁止）。任一符号缺失 / 形状不符 → 抛
 // `AUTHORITY_UNREACHABLE: <细节>`，断路即 fail-closed，绝不静默用内置副本兜底。
 //
@@ -26,7 +27,36 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_CONFIG_PATH = path.join(__dirname, '..', '..', 'config', 'defaults.json');
+const SKILL_ROOT = path.join(__dirname, '..', '..');
+const DEFAULT_CONFIG_PATH = path.join(SKILL_ROOT, 'config', 'defaults.json');
+
+/**
+ * prAutopilotRoot 解析：绝对路径原样使用；相对路径以本 skill 根目录为基准
+ * （默认值 `vendor/pr-autopilot` 是随仓 vendored 的判据源，live 与工程仓各用自己那份）。
+ */
+export function resolveAuthorityRoot(root) {
+  return path.isAbsolute(root) ? root : path.resolve(SKILL_ROOT, root);
+}
+
+/**
+ * 历史 authority 根：旧 manifest 的 ui_prediction.registry_path 按当时的绝对路径落盘，
+ * 且受 manifest_core_hash 绑定不可改写。只用于识别这些旧值，不作为加载来源。
+ */
+export const LEGACY_AUTHORITY_ROOTS = Object.freeze([
+  '/Users/praise/AI-Agent/Claude/capabilities/source/pr-autopilot',
+  '/Users/praise/AI-Agent/Claude/archive/projects/pr-autopilot-live',
+]);
+
+/**
+ * cell 声明的 registry_path 是否指向权威映射的那份 registry。
+ * 规范值 = 相对 authority 根的 POSIX 路径（info.rel，与仓所在位置无关）；
+ * 另接受本机当前绝对路径（info.path）与历史根下的同一相对路径。
+ */
+export function registryPathMatches(value, info) {
+  if (typeof value !== 'string') return false;
+  if (value === info.rel || value === info.path) return true;
+  return LEGACY_AUTHORITY_ROOTS.some((root) => value === `${root}/${info.rel}`);
+}
 
 // shape/value 校验判据（lead 在派工包 SC-3a 给定，非权威数据源——数据仍动态读）
 const EXPECTED_GATES = ['format-gate', 'rule-compliance', 'security-privacy-gate', 'product-arch-gate'];
@@ -78,11 +108,11 @@ export async function loadAuthority({ configPath } = {}) {
   const cfgPath = configPath ?? DEFAULT_CONFIG_PATH;
   const cfg = readJsonFile(cfgPath, 'config');
 
-  const prAutopilotRoot = cfg.prAutopilotRoot;
   const uiRegistryDir = cfg.uiRegistryDir;
-  if (typeof prAutopilotRoot !== 'string' || !prAutopilotRoot) {
+  if (typeof cfg.prAutopilotRoot !== 'string' || !cfg.prAutopilotRoot) {
     throw authorityUnreachable('config 缺 prAutopilotRoot（或非字符串）');
   }
+  const prAutopilotRoot = resolveAuthorityRoot(cfg.prAutopilotRoot);
   if (typeof uiRegistryDir !== 'string' || !uiRegistryDir) {
     throw authorityUnreachable('config 缺 uiRegistryDir（或非字符串）');
   }
@@ -181,7 +211,10 @@ export async function loadAuthority({ configPath } = {}) {
     const hits = [];
     for (const f of files) {
       const reg = readJsonFile(path.join(registryDir, f), `registry ${f}`);
-      if (reg.repo === canonicalRepo) hits.push({ path: path.join(registryDir, f), registry: reg });
+      if (reg.repo === canonicalRepo) {
+        const abs = path.join(registryDir, f);
+        hits.push({ path: abs, rel: path.relative(prAutopilotRoot, abs).split(path.sep).join('/'), registry: reg });
+      }
     }
     if (hits.length !== 1) {
       throw authorityUnreachable(`registry 命中数必须恰好为 1（repo=${canonicalRepo}，实际命中 ${hits.length}，目录=${registryDir}）`);

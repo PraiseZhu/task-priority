@@ -1,0 +1,52 @@
+{
+  "_comment": "task-priority 的判据源副本（authority + presubmit 三闸）。按 source.commit 原样导出，禁止手改；要更新只能从源仓重新导出并重算本清单。submit-pr 流程已归档、不调用；这里只保留 task-priority 运行需要的闭包。scripts/evolution/constitution-paths.json 内的绝对路径只被 push-guard 的 evolution CLI 使用，task-priority 不走该路径。",
+  "source": {
+    "repo": "https://github.com/PraiseZhu/pr-autopilot.git",
+    "local_archive": "archive/projects/pr-autopilot-live",
+    "commit": "33017f1524779ec55804ffb2f36e849bf5dc0c82",
+    "committed_at": "2026-09-03T10:18:48+08:00",
+    "exported_at": "2026-09-25"
+  },
+  "entry_points": [
+    "scripts/verdict-validate.mjs",
+    "scripts/consensus-gate.mjs",
+    "scripts/lib/hardening-registry.mjs",
+    "scripts/ui-paths/match.mjs",
+    "config/orchestration.json",
+    "scripts/ui-paths/registry.*.json",
+    "scripts/size-gate.mjs",
+    "scripts/pr-format-gate.mjs",
+    "scripts/intent-check.mjs"
+  ],
+  "files": {
+    "config/orchestration.json": "1621d606b189d12c1a9a269328bd1b99b09f28389f235e08bb9fd953bdf6fc05",
+    "schemas/consensus-artifact.schema.json": "dff51c547a89fe6cffc1984dcb1dbcd3afa88760a4abc35ad068d95ac2d2f834",
+    "schemas/review-verdict.schema.json": "d6b0c16acff1681cf91078393713945e5e818f6c3774f7dbb126a89bca40c2cb",
+    "scripts/batch-closure-gate.mjs": "9c2ef31f55a7ecbca0e2450da40efb6a6fd2666cf85072594a95633d52b92c87",
+    "scripts/consensus-gate.mjs": "df943d70c9202f53d906013eec7a39fc56dd799e2b719ba521717378fbab1217",
+    "scripts/evolution/constitution-paths.json": "6d5ee25162578730860b1b7f9e1678b86d5b725001f89576f34bc254c43cac13",
+    "scripts/fix-dispatch-gate.mjs": "6f352da386a6906dc41648684aa70d84316f81fd8d7e793f177a093642a747c5",
+    "scripts/fix-orchestrate.mjs": "e51f1ed8973b3a69b90c520c7f7abe48abbac3347a4c9f84f720cc92e4092a9e",
+    "scripts/fix-plan.mjs": "0b1808b43ee33ad57cb06dc841907843944f74cb09861cbdfdbe70356e2cd5d6",
+    "scripts/fix-run.mjs": "49d568ecf45e886ad9065f22fe210b587aa0a8d7d1504de386a98aa855bbca8c",
+    "scripts/intent-check.mjs": "e34d872cbe517c1fcb49a8c4e912a3d6eb7f8ab6035dd567e4126932aac2ecbb",
+    "scripts/lib/common.mjs": "0d767960d6d423eaf242e65e9e846b03a353ce8a5950b1ff8b07474077cbe42e",
+    "scripts/lib/git-checks.mjs": "a6bdc83043218f4e14efa7333ee5b97a7964c17588c1756b5b3c3d61748a5708",
+    "scripts/lib/hardening-registry.mjs": "aa46ce9072eddfdc39cb188a2763cae520bf7381cacdbbc119c0b27a09cc7b13",
+    "scripts/pr-format-gate.mjs": "423351db5c6db1db17474353e2dc6ae4593b382b9151b74fdac3332507b29bd7",
+    "scripts/push-guard.mjs": "1a89c818b93801a073200a61babab379db010fe16e65c0158df27c11ba18c313",
+    "scripts/review-input-hash.mjs": "686c0b97270e004edd694558b6b616f93cc56ee198446329c0374cfea64278e7",
+    "scripts/sc-coverage-gate.mjs": "f9efc06d6de3b2dd14da3ce3f915bc684286b80e7f0ce707b1ffcdb749f31d94",
+    "scripts/size-gate.mjs": "bad0377ee07c45493dc9529352522883f753227ea505c49d20d5ad2873ad022b",
+    "scripts/ui-paths/match.mjs": "50559b5815585705d768398e5ca8974e39837c9e1ea35f9ea046910a81b33f4c",
+    "scripts/ui-paths/registry.approve-exec.json": "80615462777e96082fc7e0d2b22f6be2f32b67ffe02be5cb105074b71bd29985",
+    "scripts/ui-paths/registry.cindy.json": "8f2749f405065d6eb1a72de212d24aeb2fa4cf446b4b080e7744482b1f9753ec",
+    "scripts/ui-paths/registry.mivo-plugin.json": "887bb55fe0499d8e180f3733b9c92c4573c83d49a175a8f71054e790127850ba",
+    "scripts/ui-paths/registry.mivo.json": "9d471c9205838b4a312ecc94fb527caa80d8b666a102a6496a29fbf7adfc507f",
+    "scripts/ui-paths/registry.pr-autopilot.json": "0cd75df38a945bc21973d42e567c68fad1213a97889b6e28e6cd900a535fae7d",
+    "scripts/ui-paths/registry.project-akb2.json": "daf92b845853a6f5431f8be6bc2f15a87bc262ac39af3a355fb11a5f2d148dcb",
+    "scripts/ui-paths/registry.review-pr.json": "fdc70ab4928a988d2ce0006eb5ec8c251464a18720d047f3ed90a0e72b87dbe7",
+    "scripts/ui-paths/registry.task-priority.json": "a04f3a95aa8b221bdb54d328a5e737932a726149b3108f477153cb15afc13383",
+    "scripts/verdict-validate.mjs": "051fe4a4bad855b22f52f1d73fb782013c52561627363264db6f5376b1d305fd"
+  }
+}

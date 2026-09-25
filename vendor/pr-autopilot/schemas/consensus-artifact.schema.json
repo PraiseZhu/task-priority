@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pr-autopilot/consensus-artifact/v4",
+  "title": "共识 artifact v4（issue #9 R4 修复①：pr_number PR 身份绑定，入 consensus_artifact_hash 照 gate_result/round 做法；不进 review_input_hash——lead 2026-08-07 裁决，防「建 PR」成整轮失效触发器）",
+  "type": "object",
+  "required": [
+    "schema_version", "review_input_hash", "base_sha", "candidate_sha",
+    "canonical_findings", "verdict_hashes", "consensus_artifact_hash",
+    "created_at", "gate_result", "round", "parent_artifact_hash", "pr_number"
+  ],
+  "properties": {
+    "schema_version": { "const": "v4" },
+    "pr_number": {
+      "type": ["integer", "null"],
+      "description": "issue #9 R4 修复①：PR 身份绑定。PR 号（有 draft PR 时）或 null（无 PR 直跑三审，SKILL.md 明文支持）。入 consensus_artifact_hash（recomputeArtifactHash），不进 review_input_hash（lead 裁决：进了会因「建 PR」动作让同一个 candidate 的 hash 变 → 三份 verdict 全失效 → 整轮重跑，正是轮次膨胀根因之一）。"
+    },
+    "review_input_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "round": {
+      "type": "integer", "minimum": 1,
+      "description": "issue #9 SC-B: PASS consensus artifact 的序号（不是审查尝试次数）。首个可 PASS 的共识永远是 1、parent_artifact_hash=null；round>=2 必须携带 round-1 的完整可信 parent。入 consensus_artifact_hash（consensus-gate.mjs 的 recomputeArtifactHash）。"
+    },
+    "parent_artifact_hash": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$",
+      "$comment": "round=1 时必须恰为 null（首个可 PASS 的共识永远是无谱系的根）；round>=2 时必须是 round-1 那份 PASS artifact 的 consensus_artifact_hash（合法 64-hex）。JSON Schema 的 `type` union 允许 string 或 null 两种形状，但两者中具体选哪个由 round 值决定——这条 round↔parent 的条件约束无法用 JSON Schema 表达，运行时必须由 consensus-gate.mjs 的 assertArtifactShape 显式跳字段校验（issue #9 SC-R2-3/6）。",
+      "description": "issue #9 SC-3/SC-B: 谱系指针，round=1 为 null，round>=2 为上一轮 PASS artifact 的 hash。追加入 consensus_artifact_hash（recomputeArtifactHash）。"
+    },
+    "canonical_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["canonical_key", "origins", "primary_face", "severity", "anchor", "status"],
+        "properties": {
+          "canonical_key": { "type": "string" },
+          "origins": {
+            "type": "array",
+            "minItems": 1,
+            "$comment": "审②-F2: 保留全部 origins，每个 origin 的 finding 都必须由其本人 close（conjunct② 全量断言）",
+            "items": {
+              "type": "object",
+              "required": ["reviewer", "finding_id"],
+              "properties": {
+                "reviewer": { "enum": ["claude-adversarial", "codex-adversarial", "upstream-preview"] },
+                "finding_id": { "type": "string" }
+              }
+            }
+          },
+          "primary_face": { "type": "string" },
+          "severity": { "type": "string" },
+          "anchor": { "type": "string" },
+          "invariant": { "type": "string", "minLength": 1, "maxLength": 120, "description": "SC-B1: 冻结自首个 origin 提供的值（consensus-gate.mjs），suggestion 级 finding 可不带。" },
+          "family_key": {
+            "type": "string", "pattern": "^fk1-[0-9a-f]{64}$",
+            "description": "D1: 跨 reviewer/跨 candidate 的内容派生身份，从冻结后的 invariant 归一化文本 sha256 派生（consensus-gate.mjs 的 familyKeyOf）——下游分组/校验的唯一合法依据，不是 family_id。suggestion 级 finding（无 invariant）可不带。"
+          },
+          "origin_family_ids": {
+            "type": "array",
+            "description": "D1: 各 origin 自己的本地归组标签（供人工回溯，不参与任何机器分组判定）。",
+            "items": {
+              "type": "object",
+              "required": ["reviewer", "family_id"],
+              "properties": {
+                "reviewer": { "enum": ["claude-adversarial", "codex-adversarial", "upstream-preview"] },
+                "family_id": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          "status": { "enum": ["open", "closed"] }
+        }
+      }
+    },
+    "verdict_hashes": {
+      "type": "object",
+      "required": ["claude-adversarial", "codex-adversarial", "upstream-preview"],
+      "additionalProperties": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+    },
+    "consensus_artifact_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "created_at": { "type": "string" },
+    "gate_result": { "enum": ["pass", "fail"] },
+    "fail_reasons": { "type": "array", "items": { "type": "string" } }
+  }
+}
