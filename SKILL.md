@@ -1,22 +1,20 @@
 ---
 name: task-priority
-description: 汇总任务优先级 / 汇总问题优先级（task priority / SC 提炼 / 优先级清单）。在「任务目标」与「goal 派工执行」之间插入前置工序：把任务拆成完整优先级清单 + 多颗粒度 SC（Success Criteria），用本地三审七面维度反推补全，经对抗质询 + 机器预验证后出 final 双产物（人读 priority-plan.md + 机器 task-manifest.json），让 goal 精准消费、让三审不再是遗漏的第一发现者。触发词：汇总任务优先级、汇总问题优先级。
+description: 汇总任务优先级 / 汇总问题优先级（task priority / SC 提炼 / 优先级清单）。在「任务目标」与「goal 派工执行」之间插入前置工序：把任务拆成完整优先级清单 + 多颗粒度 SC（Success Criteria），用七面审查维度反推补全，经对抗质询 + 机器预验证后出 final 双产物（人读 priority-plan.md + 机器 task-manifest.json），交给「批准执行」派 owner 用 goal 精准消费，让遗漏在计划期暴露而不是到执行期或 PR 审查期才发现。触发词：汇总任务优先级、汇总问题优先级。
 ---
 
 # task-priority — 汇总任务优先级 + SC 提炼
 
-> 定位：在「任务目标（+deep research）」和「goal 派 worker 执行」之间的一道前置工序。
+> 定位：在「任务目标（+deep research）」和「批准执行」之间的一道前置工序。
+> 下游链：本 skill 出 final manifest → `approve-exec` lead 拆 PR、派独立 owner → owner 用 goal 场景 C 跑 SC → owner 本地 e2e + `ready-check`（含 presubmit 三闸）→ PR Ready → 云端审查。本地不再有全局三审。
 > 产出：完整优先级清单 + 多颗粒度 SC → 对抗质询 + 机器预验证 → final 双产物（priority-plan.md + task-manifest.json）。
-> 不做：修复执行（归 goal）、三审 verdict（归 submit-pr）、自动派工/自动对外 push。
+> 不做：修复执行（归 goal）、PR 审查 verdict（Ready 后由云端审查负责）、自动派工/自动对外 push。
 
-## 为什么需要本 skill（近 7 天实测，不是推测）
+## 为什么需要本 skill
 
-- goal 调用 120 次 vs submit-pr 41 次（≈3:1）——大量执行轮消耗在返修。
-- mivo-canvas 近 7 天 165 个 PR：`fix(` 前缀 43 个（26%）、带「后续修复/回归/收口」14 个（8%）、事后拆分列车 20 个（12%）。
-- SC 台账挖掘（`~/.claude/.goal/` 75 份）：mivo-561 的 SC 从 9 → 30 → 38 条两轮扩容；bd-disarm 第 17 轮才发现「永久饥饿」（前 10 轮全过）；review-pr-r1-prescan 的 v1 架构假设整版被推翻重写。**全是「前期遗漏、到三审/执行期才暴露」的返工。**
-- 三审 verdict 挖掘（15 份）：最常 fail 是 **D 文档（5 次）> G 声称核实（4 次）**；12 条 major finding 实为 **6 个反复复发的 invariant 家族**——审查拦的是少数几类反复犯的问题，可前置预测。
+多 PR 任务的返工大多来自计划期遗漏：SC 在执行中途被迫扩容、边界情形到执行后期才暴露、审查反复拦下同几类 invariant 问题。这几类可以前置预测，本 skill 在计划期就把它们变成 SC。历史挖掘数据见 `references/gap-catalog.md`。
 
-**经济账**：本 skill 单次成本约 50-150k token。成立的前提是省下一轮三审返工——因此**只用于多 PR / 跨模块 / 影响面不明的任务**；单文件小修不要触发（见 Phase 0 适用边界）。
+**经济账**：本 skill 单次成本约 50-150k token。成立的前提是省下一轮执行期返工——因此**只用于多 PR / 跨模块 / 影响面不明的任务**；单文件小修不要触发（见 Phase 0 适用边界）。
 
 ## 核心机制 A：两阶段契约（消除 Phase 3 死锁）
 
@@ -98,8 +96,8 @@ node <SKILL_ROOT>/scripts/lib/review-receipt.mjs --draft-manifest <草稿.json> 
 final-gate 校验：**存在性 + hash 关联**——receipt 的草稿 hash 必须对得上当前 manifest 的谱系
 （`draftAncestorHash`：把当前 manifest 还原成草稿形状重算 hash；质询后改过 SC/coverage 等
 草稿期字段 → 祖先漂移 → REVIEW_RECEIPT_STALE 拒）+ gap-catalog 指纹现算比对。缺失/漂移 → 拒。
-**明确不做**：不校验语义真伪——防的是漏跑，不防敷衍质询；敷衍质询的兜底本来就是三审，计划里
-已如实声明。ledger 指纹由 `lib/ledger-query.mjs` 产出（唯一实现），本机制只消费其输出形状。
+**明确不做**：不校验语义真伪——防的是漏跑，不防敷衍质询；敷衍质询的兜底是执行期 SC 验证、
+e2e 与 PR Ready 后的云端审查，计划里已如实声明。ledger 指纹由 `lib/ledger-query.mjs` 产出（唯一实现），本机制只消费其输出形状。
 
 **判据所有权**：投影比对与 review-receipt 校验归 final-gate（与 hash/receipts 同一语义族，
 经 `lib/plan-projection.mjs` / `lib/review-receipt.mjs` 执行），其余闸不判。两闸在 final-gate
@@ -145,8 +143,10 @@ ui_prediction: {
                      #   取并集 → 规范化(POSIX) → 去重 → 排序。cell 若落盘此值，
                      #   必须与派生值逐字相等，不等即拒（禁止裁剪样本）
   registry_path,     # 派生：由 repo → authority registry 的固定映射/allowlist 决定
-                     #   （权威口径 = submit-pr SKILL.md:51 的 scripts/ui-paths/registry.<repo>.json）
-                     #   禁止任意路径；cell 落盘值必须等于映射值，不等即拒
+                     #   （权威口径 = lib/authority.mjs 从 <prAutopilotRoot>/scripts/ui-paths/registry.*.json 派生）
+                     #   落盘写相对 authority 根的路径（如 scripts/ui-paths/registry.mivo.json）；
+                     #   也接受本机绝对路径与历史 authority 根下的同一文件（旧 manifest 受 hash 绑定不可改）；
+                     #   指向其它 registry 或任意路径一律拒
   config_hash,       # matcher 输出，逐字段比对
   touches_ui,        # matcher 输出，逐字段比对
   matched_paths[]    # matcher 输出，逐字段比对
@@ -159,7 +159,7 @@ ui_prediction: {
 
 ## 核心机制 F：B 维度「预测态」语义
 
-计划期无真实 `base..candidate` changedFiles，ui-match 只吃**预测 anchor_paths** → 状态为 `covered` 或 `n_a_predicted`（记录输入路径集 + registry `config_hash`，标注「预测性判定，真实判定在 submit-pr Phase 1」）。`n_a_predicted` 不能充真实 n_a，且仅 B 维度可用——**不冒充 submit-pr 的真实 touches_ui**。
+计划期无真实 `base..candidate` changedFiles，ui-match 只吃**预测 anchor_paths** → 状态为 `covered` 或 `n_a_predicted`（记录输入路径集 + registry `config_hash`，标注「预测性判定，真实判定需等执行期有真实 diff」）。`n_a_predicted` 不能充真实 n_a，且仅 B 维度可用——**不冒充基于真实 diff 的 touches_ui**。
 
 ## 工作流
 
@@ -167,7 +167,7 @@ ui_prediction: {
 
 仅「汇总任务优先级 / 汇总问题优先级」触发。无任务目标 → fail-closed 问清楚再开工。
 
-**适用边界（硬）**：多 PR / 跨模块 / 影响面不明的任务才用；**单文件小修不要触发**——本 skill 单次成本约 50-150k token，经济账成立的前提是省下一轮三审。任务只需改一个文件、影响面清晰 → 直接进 goal，不要走本 skill。
+**适用边界（硬）**：多 PR / 跨模块 / 影响面不明的任务才用；**单文件小修不要触发**——本 skill 单次成本约 50-150k token，经济账成立的前提是省下一轮执行期返工。任务只需改一个文件、影响面清晰 → 直接进 goal，不要走本 skill。
 
 ### Phase 1 · 脚本抓数据
 
@@ -175,15 +175,17 @@ probe.mjs（codemap 反向依赖 / git 热区 / 测试映射 / scripts 枚举）
 
 probe.mjs（调用细节：codemap 反向依赖 / git 热区 / 测试映射 / scripts 枚举）；`node <SKILL_ROOT>/scripts/lib/ledger-query.mjs` 读台账弹药（top-occurrences 按复发频次降序 + 本次消费快照的 ledger fingerprint；`TASK_PRIORITY_SKILL_ROOT` 可重定向隔离；`BOOTSTRAP_EMPTY_LEDGER` = 台账尚未开始积累，**不等于**「已查过、无逃逸」）；authority 现读（FACES / DEFAULT_REQUIREMENTS / HARDENING_CLASSES / familyKeyOf / recomputeArtifactHash / matchUiPaths / capacity）。**authority 失败即停**（`AUTHORITY_UNREACHABLE`），不往下写。
 
+**判据源（vendored）**：authority 与 presubmit 三闸脚本都来自 `config/defaults.json` 的 `prAutopilotRoot`，默认值 `vendor/pr-autopilot`（相对路径以本 skill 根为基准）。这是从 pr-autopilot 源仓按固定 commit 原样导出的最小闭包，来源与逐文件 sha256 见 `vendor/pr-autopilot/VENDOR.json`，`tests/vendor-integrity.test.mjs` 校验它未被手改、文件集不增不减、import 不越出 vendor。本 skill 不再依赖归档仓，归档可以按归档规则处理。不要手改 vendor 内文件；要更新判据只能从源仓重新导出并重算 VENDOR.json。
+
 ### Phase 2 · 优先级 + SC 起草
 
-PR 拆分预判（codemap 模块边界 + **人工规模估计**——注意：计划期没有 candidate，拿不到 `merge-base..HEAD` 真实 diff，**size-gate 无法预跑、不构成门**；估计只作风险提示，真实 800 行闸在 submit-pr Phase 1 对真实 candidate 判定）；P0/P1/P2 分层；多颗粒度 SC（三段式 + anchor_paths + faces + **可选声明字段 `gates`（值域 = authority GATES 的 4 个闸）与 `hardening_classes`（值域 = authority HARDENING_CLASSES 的 1..10，2026-08-09）**——不是每条 SC 都碰闸或加固类，两者都可省略；但 coverage 矩阵里某 gate/hardening 格一旦标 `covered`/`n_a_predicted`，就必须有 SC 声明了该维度，否则 coverage-matrix 报 `CELL_GATE_NOT_DECLARED` / `CELL_HARDENING_NOT_DECLARED`（与 `CELL_FACE_NOT_DECLARED` 同族，防一条 SC 填满全矩阵）+ fix 类必填 predicted_invariant/primary_face + **每个 priority 必备 pre-submit SC 组，见下**）。颗粒度例句库见 `references/sc-granularity.md`。
+PR 拆分预判（codemap 模块边界 + **人工规模估计**——注意：计划期没有 candidate，拿不到 `merge-base..HEAD` 真实 diff，**size-gate 无法预跑、不构成门**；估计只作风险提示，真实规模门在执行期对真实 candidate 判定：presubmit-size SC，加上 approve-exec 的目标仓 size-gate 与 ready-check 总量门）；P0/P1/P2 分层；多颗粒度 SC（三段式 + anchor_paths + faces + **可选声明字段 `gates`（值域 = authority GATES 的 4 个闸）与 `hardening_classes`（值域 = authority HARDENING_CLASSES 的 1..10，2026-08-09）**——不是每条 SC 都碰闸或加固类，两者都可省略；但 coverage 矩阵里某 gate/hardening 格一旦标 `covered`/`n_a_predicted`，就必须有 SC 声明了该维度，否则 coverage-matrix 报 `CELL_GATE_NOT_DECLARED` / `CELL_HARDENING_NOT_DECLARED`（与 `CELL_FACE_NOT_DECLARED` 同族，防一条 SC 填满全矩阵）+ fix 类必填 predicted_invariant/primary_face + **每个 priority 必备 pre-submit SC 组，见下**）。颗粒度例句库见 `references/sc-granularity.md`。
 
 #### 必备 pre-submit SC 组（每个 priority 三条，kind=verify）
 
-**每个 `functional_pr=true` 的 priority 必须带三条 `kind=verify` 的 SC**（id 前缀 `presubmit-size` / `presubmit-format` / `presubmit-intent`），把 submit-pr 的三个机器闸搬到**真实 candidate** 上执行——这是 800 行闸最早可被真实判定的时点。模板与完整三段式见 `references/sc-granularity.md`「必备 pre-submit SC 组」。
+**每个 `functional_pr=true` 的 priority 必须带三条 `kind=verify` 的 SC**（id 前缀 `presubmit-size` / `presubmit-format` / `presubmit-intent`），在**真实 candidate** 上执行三个机器闸（脚本在 vendored 判据源内）——这是 800 行闸最早可被真实判定的时点。三闸结果是 approve-exec `ready-check.mjs --presubmit-dir` 的必需输入：目录内 `size.json` / `format.json` / `intent.json` 各含 `result` 与 `candidate_sha`，缺一份或 `candidate_sha` ≠ HEAD 都判不通过。模板与完整三段式见 `references/sc-granularity.md`「必备 pre-submit SC 组」。
 
-| SC id 前缀 | verify 命令（真实可执行形态；`<prAutopilotRoot>` = `config/defaults.json` 的 `prAutopilotRoot`） | 期望 |
+| SC id 前缀 | verify 命令（真实可执行形态；`<prAutopilotRoot>` = `config/defaults.json` 的 `prAutopilotRoot` 按 skill 根解析后的绝对路径，默认 `<SKILL_ROOT>/vendor/pr-autopilot`；写进 SC 时必须展开成绝对路径，owner 在别的 cwd 执行） | 期望 |
 |---|---|---|
 | `presubmit-size` | `node <prAutopilotRoot>/scripts/size-gate.mjs --repo-dir <候选仓> --base origin/main` | exit 0 且输出 `result ≠ STOP`（STOP 即拆 PR——800 行闸唯一出路是拆，不许豁免/游说） |
 | `presubmit-format` | `node <prAutopilotRoot>/scripts/pr-format-gate.mjs --repo-dir <候选仓> --base origin/main --title <PR 标题> --body-file <PR 正文文件>` | exit 0 且输出 `result ≠ FAIL` |
@@ -191,11 +193,11 @@ PR 拆分预判（codemap 模块边界 + **人工规模估计**——注意：�
 
 **结果绑定 candidate SHA（硬要求）**：每条 SC 的 expect 都要求闸结果与**当前候选分支 HEAD** 绑定——size-gate 输出自带 `head_sha`，直接比对 `git rev-parse HEAD`；pr-format-gate / intent-check 无 head 字段，由执行方先 `git rev-parse HEAD` 记录 candidate SHA 并把闸结果与该 SHA 一并写进执行报告。**不绑 SHA 的闸结果无效**（candidate 变化即作废），绑定做法参照 `final-gate` 的 `release-receipt.base_sha`。
 
-**执行环节**：waves-plan 把 `kind=verify` 排到尾波（恒在 fix 之后），goal 实现完成后、送 submit-pr 之前由尾波 worker 在真实 candidate 上执行——这也是「计划期做不到」的机理：计划期无 candidate、`merge-base..HEAD` diff 为空，任何预跑都只会给出假 PASS。
+**执行环节**：waves-plan 把 `kind=verify` 排到尾波（恒在 fix 之后），goal 实现完成后、owner 跑 ready-check 之前在真实 candidate 上执行——这也是「计划期做不到」的机理：计划期无 candidate、`merge-base..HEAD` diff 为空，任何预跑都只会给出假 PASS。
 
 **计划期 preflight 语义**：`cmd=node` ∈ existsOnly 清单 → 恒判 `exists_not_run`（只证 node 存在），**不得当绿采信**，也不需要 disposition（只有 `green_warn` 需要）。
 
-**边界**：本 SC 组的「必备」由 lead 起草时执行（本 skill 的 manifest-validate 未加机器断言，避免与 submit-pr 侧真实 size-gate 双头判据）；coverage 建议挂 `face G`（声称核实）与 `gate format-gate` 维度。
+**边界**：本 SC 组的「必备」由 lead 起草时执行（本 skill 的 manifest-validate 未加机器断言，避免与 ready-check 的 presubmit 校验双头判据）；coverage 建议挂 `face G`（声称核实）与 `gate format-gate` 维度。
 
 ### Phase 3 · 七面反推闸（机器）
 
@@ -212,9 +214,10 @@ PR 拆分预判（codemap 模块边界 + **人工规模估计**——注意：�
 **sub 派工模板（硬）**：
 
 ```
-Agent 工具，subagent_type=general-purpose，model=sonnet 必须显式传
-（内置 agent 类型无 frontmatter，不传会继承 lead 的 opus——按 agent-dispatch.md 硬规则）
+Agent 工具，subagent_type=claude，model=sonnet 显式传
 ```
+
+理由：对抗质询是 T4 语义审查，按 `agent-dispatch.md` 默认 sonnet；内置类型没有 frontmatter，不传 model 会继承 lead 模型。不用 general-purpose：质询提示必然含「读草稿文件」这类词，本机 `pre-agent-model-route` hook 会把它判成文件搜索任务、强制 haiku 并拦下 sonnet。
 
 任务描述要点：给全草稿路径 + gap-catalog.md + 台账高频逃逸清单；要求只报「漏了什么 + 哪些 n_a 敷衍」，不报泛泛的「可以更好」。
 
@@ -238,7 +241,9 @@ sc-preflight 五态（`fabricated` / `red_ok` / `green_warn` / `exists_not_run` 
 
 **T1 边界声明④（含在核心机制 E）**：B 维度只证 matcher 一致，`anchor_paths` 是否列全不可机器判。
 
-本 skill **不接线 submit-pr**（不自动闭环）：submit-pr 收口后，由 lead 跑 priority-plan.md 尾部内嵌的一键回流命令（含 `--expect-manifest-hash`）→ gap-backfill 消费 canonical_findings，经 familyKeyOf+primary_face 对账，走五道依序检查（receipt 新鲜度含 repo 身份 → manifest hash → artifact 自洽 → (canonical_repo,branch) 主关联 → pr_number 辅助），逃逸按 fingerprint 入台账（默认不 push）；未命中项进人工复核段。机器层只做 exact-key，同义改写的 semantic gap 属已知残余。
+**当前状态：暂停（没有输入）。** 回流消费的 `canonical_findings` 来自 submit-pr 三审共识产物，该流程已归档，本地没有新的产出方，台账因此一直为空。只有拿到同 schema 的审查产物时才跑下面的流程；不要拿云端审查评论或自写 JSON 冒充 `canonical_findings`。
+
+本 skill 不自动闭环：拿到审查产物后，由 lead 跑 priority-plan.md 尾部内嵌的一键回流命令（含 `--expect-manifest-hash`）→ gap-backfill 消费 canonical_findings，经 familyKeyOf+primary_face 对账，走五道依序检查（receipt 新鲜度含 repo 身份 → manifest hash → artifact 自洽 → (canonical_repo,branch) 主关联 → pr_number 辅助），逃逸按 fingerprint 入台账（默认不 push）；未命中项进人工复核段。机器层只做 exact-key，同义改写的 semantic gap 属已知残余。
 
 ## 产物落点纪律
 
@@ -288,5 +293,5 @@ Node 24.13 无 `--test-exclude-pattern`（实测 `bad option`），所以排除�
 
 ## 参考
 
-- `needs_three_review` 判据：功能方面的改动必须走 submit-pr 三审；非功能性小 PR（测试补强/文档/格式/纯配置，且生产行为不变）免三审。权威：`~/.claude/rules/pr-submit-gate.md`。按实际 diff 判定，不按标题。
+- `needs_three_review`（每个 packet 必填布尔，approve-exec 出包时强制校验；字段名是历史命名，为保持跨仓契约不改名）：`true` = 功能 PR，按目标仓 PR 门禁完成验证并在 Ready 后接受云端审查；`false` = 非功能性小 PR（测试补强/文档/格式/纯配置，且生产行为不变）。本地已无全局三审，这个字段不再触发 submit-pr。权威：`~/.claude/rules/pr-submit-gate.md`。按实际 diff 判定，不按标题。
 - 颗粒度标准：`references/sc-granularity.md`

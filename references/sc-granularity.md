@@ -65,7 +65,7 @@
 
 ## 必备 pre-submit SC 组（模板，每个 priority 三条）
 
-> 每个 `functional_pr=true` 的 priority 必须带这三条 `kind=verify` 的 SC（SKILL.md「必备 pre-submit SC 组」）。它们把 submit-pr 的三个机器闸搬到真实 candidate 上——这是 800 行闸最早可被真实判定的时点；计划期无 candidate 无法预跑，任何预演都只会假 PASS。`<prAutopilotRoot>` 由 `config/defaults.json` 的 `prAutopilotRoot` 决定，其余 `<...>` 为执行期实参（候选仓路径 / PR 标题与正文文件）。
+> 每个 `functional_pr=true` 的 priority 必须带这三条 `kind=verify` 的 SC（SKILL.md「必备 pre-submit SC 组」）。它们在真实 candidate 上跑三个机器闸（脚本来自 `prAutopilotRoot` 指向的 vendored 判据源 `vendor/pr-autopilot`，结果写成 approve-exec ready-check `--presubmit-dir` 消费的 size/format/intent.json）——这是 800 行闸最早可被真实判定的时点；计划期无 candidate 无法预跑，任何预演都只会假 PASS。`<prAutopilotRoot>` 由 `config/defaults.json` 的 `prAutopilotRoot` 按 skill 根解析（默认 `<SKILL_ROOT>/vendor/pr-autopilot`，写进 SC 须展开为绝对路径），其余 `<...>` 为执行期实参（候选仓路径 / PR 标题与正文文件）。
 
 ```json
 [
@@ -74,7 +74,7 @@
     "priority_id": "<priority_id>",
     "kind": "verify",
     "granularity": "assertion",
-    "change": "在真实 candidate（goal 实现完成后的候选分支）上运行 submit-pr 的 size-gate",
+    "change": "在真实 candidate（goal 实现完成后的候选分支）上运行 size-gate",
     "holds": "size-gate 对 candidate 的 merge-base..HEAD 真实 diff 判 PASS（result ≠ STOP），输出 head_sha 与候选分支 HEAD 一致；判 STOP 时拆 PR 是唯一出路（800 行闸硬红线，不许豁免/游说）",
     "verify": {
       "cmd": "node",
@@ -90,7 +90,7 @@
     "priority_id": "<priority_id>",
     "kind": "verify",
     "granularity": "assertion",
-    "change": "在真实 candidate 上运行 submit-pr 的 pr-format-gate（真实 PR 标题/正文）",
+    "change": "在真实 candidate 上运行 pr-format-gate（真实 PR 标题/正文）",
     "holds": "pr-format-gate 双读（base 树 + 候选树）判 result ≠ FAIL；候选树收紧规则当场生效、放宽方向被 base 侧拦截",
     "verify": {
       "cmd": "node",
@@ -106,7 +106,7 @@
     "priority_id": "<priority_id>",
     "kind": "verify",
     "granularity": "assertion",
-    "change": "在真实 candidate 上运行 submit-pr 的 intent-check（PR body marker ↔ .pr-intent.md 双副本一致）",
+    "change": "在真实 candidate 上运行 intent-check（PR body marker ↔ .pr-intent.md 双副本一致）",
     "holds": "intent-check 两副本 digest 一致（OK/REBUILT 均 exit 0）；MARKER_MISSING/FALLBACK（exit 2）是 action-required 不是通过——marker 落 PR body 后重跑至 exit 0",
     "verify": {
       "cmd": "node",
@@ -121,7 +121,7 @@
 ```
 
 **使用注意**：
-- 三条 SC 的 `kind=verify` → waves-plan 自动排尾波（恒在 fix 之后），goal 实现完成后、送 submit-pr 前执行；`anchor_paths` 留空（闸不碰文件，独立一组自由并行）。
+- 三条 SC 的 `kind=verify` → waves-plan 自动排尾波（恒在 fix 之后），goal 实现完成后、owner 跑 ready-check 前执行；`anchor_paths` 留空（闸不碰文件，独立一组自由并行）。
 - 计划期 sc-preflight 对 `cmd=node` 恒判 `exists_not_run`（node ∈ existsOnly 清单，只验存在性）——**不得当绿采信**，这正是「计划期跑不了真实闸」的机器表达。
 - coverage 建议挂 `face G`（声称核实）与 `gate format-gate` 维度；机器层对「必备」无断言，由 lead 起草时执行。
 

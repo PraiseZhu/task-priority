@@ -14,13 +14,13 @@ import {
   hubViolations,
   WavesPlanError,
 } from '../scripts/waves-plan.mjs';
-import { loadAuthority } from '../scripts/lib/authority.mjs';
+import { loadAuthority, resolveAuthorityRoot } from '../scripts/lib/authority.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SKILL_ROOT = join(HERE, '..');
 const WAVES_SCRIPT = join(SKILL_ROOT, 'scripts', 'waves-plan.mjs');
 const DEFAULT_CONFIG = JSON.parse(readFileSync(join(SKILL_ROOT, 'config', 'defaults.json'), 'utf8'));
-const REAL_AUTOPILOT = DEFAULT_CONFIG.prAutopilotRoot;
+const REAL_AUTOPILOT = resolveAuthorityRoot(DEFAULT_CONFIG.prAutopilotRoot);
 const ORCH_PATH = join(REAL_AUTOPILOT, 'config', 'orchestration.json');
 const FIXTURES = join(HERE, 'fixtures', 'waves');
 

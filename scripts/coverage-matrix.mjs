@@ -52,7 +52,7 @@
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { loadAuthority } from './lib/authority.mjs';
+import { loadAuthority, registryPathMatches } from './lib/authority.mjs';
 import { canonicalRepo } from './lib/repo-identity.mjs';
 
 // ── reason_code 结构化枚举（本闸定义并导出；自由文本不算 reason_code）──
@@ -268,8 +268,8 @@ export function checkCoverage(manifest, { authority, getRepo } = {}) {
           mismatch = `input_paths 与派生样本（task 全部 SC 的 anchor_paths 并集）不等`;
         }
         // registry_path 落盘值必须等于权威映射
-        if (!mismatch && 'registry_path' in up && up.registry_path !== registryInfo.path) {
-          mismatch = `registry_path ≠ 权威 registry（${registryInfo.path}）`;
+        if (!mismatch && 'registry_path' in up && !registryPathMatches(up.registry_path, registryInfo)) {
+          mismatch = `registry_path ≠ 权威 registry（${registryInfo.rel}）`;
         }
         if (!mismatch) {
           // 用上方已现跑的 matcher 结果，三个输出逐字段比对

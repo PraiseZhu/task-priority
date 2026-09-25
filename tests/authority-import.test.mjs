@@ -16,6 +16,7 @@ import { execFileSync } from 'node:child_process';
 import {
   loadAuthority,
   assertFacesFromAuthority,
+  resolveAuthorityRoot,
 } from '../scripts/lib/authority.mjs';
 import {
   CORE_EXCLUDE_KEYS,
@@ -30,7 +31,7 @@ import {
 
 const SKILL_ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DEFAULT_CONFIG = JSON.parse(readFileSync(path.join(SKILL_ROOT, 'config', 'defaults.json'), 'utf8'));
-const PR_AUTOPILOT_ROOT = DEFAULT_CONFIG.prAutopilotRoot;
+const PR_AUTOPILOT_ROOT = resolveAuthorityRoot(DEFAULT_CONFIG.prAutopilotRoot);
 const MIVO_DIR = '/Users/praise/AI-Agent/Claude/projects/Project MivoCanvas';
 
 function tmpConfigFile({ prAutopilotRoot, uiRegistryDir }) {
